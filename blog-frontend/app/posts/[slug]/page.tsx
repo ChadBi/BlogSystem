@@ -27,7 +27,15 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               <h1 className="text-4xl font-black leading-tight">{post.title}</h1>
               <p className="mt-4 text-sm text-slate-500">{formatDate(post.publishedAt)} · Shark · 👁 {post.views} 浏览 · 💬 {post.comments} 评论</p>
             </div>
-            <PostThumb icon="🦀" />
+            {post.cover ? (
+              <img
+                src={post.cover}
+                alt={post.title}
+                className="h-full w-full rounded-xl border-2 border-ocean-900 object-cover"
+              />
+            ) : (
+              <PostThumb icon="🦀" />
+            )}
           </div>
           <div className="mb-6 rounded-2xl border-2 border-dashed border-coral bg-coral/5 p-4 font-bold text-ocean-900">TL;DR：{post.summary}</div>
           <ArticleContent content={post.content} />

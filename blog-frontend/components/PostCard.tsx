@@ -16,7 +16,17 @@ export function PostCard({ post, compact = false }: { post: Post; compact?: bool
   return (
     <Link href={`/posts/${post.slug}`} className="group block rounded-2xl border-2 border-ocean-800/25 bg-white/70 p-3 transition hover:-translate-y-1 hover:border-coral hover:shadow-pixel">
       <div className={compact ? 'grid grid-cols-[84px_1fr] gap-3' : 'space-y-3'}>
-        <PostThumb icon={iconBySlug[post.slug] ?? '🦈'} />
+        {post.cover ? (
+          <div className={compact ? 'h-full min-h-24' : 'h-48'}>
+            <img
+              src={post.cover}
+              alt={post.title}
+              className="h-full w-full rounded-xl border-2 border-ocean-900 object-cover"
+            />
+          </div>
+        ) : (
+          <PostThumb icon={iconBySlug[post.slug] ?? '🦈'} />
+        )}
         <div>
           <h3 className="line-clamp-2 font-black group-hover:text-coral">{post.title}</h3>
           <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">{post.summary}</p>
