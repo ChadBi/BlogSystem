@@ -243,7 +243,7 @@ V1 验收标准：
 - **PixelCard**: 视觉统一的"像素卡片"容器；
 - **PostCard**: 文章卡片，支持紧凑模式（`compact`）；
 - **ArticleContent**: Markdown 正文渲染；
-- **Hero / SharkMascot / Logo**: 视觉元素；
+- **Hero / BrandMark / Logo**: 视觉元素；
 - **TagPill / PostThumb / StatsGrid / Timeline**: 小组件。
 
 ---
