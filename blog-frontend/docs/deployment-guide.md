@@ -318,12 +318,9 @@ const nextConfig = {
         hostname: 'localhost',
         port: '8055',
         pathname: '/assets/**'
-      },
-      {
-        protocol: 'https',
-        hostname: '**',
-        pathname: '/assets/**'
       }
+      // 生产环境从 process.env.DIRECTUS_URL 解析 hostname 注入，
+      // 不再使用 hostname: '**' 通配（安全收紧）
     ]
   }
 };

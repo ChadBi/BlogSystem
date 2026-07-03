@@ -15,6 +15,8 @@
 | tags | many-to-many | 标签 |
 | views | integer | 浏览量 |
 | likes | integer | 点赞数 |
+| comments | integer | 评论数 |
+| date_created | timestamp | Directus 自动生成的创建时间，作为 `published_at` 的回退（见 `lib/directus.ts` normalizePost） |
 
 ## categories
 
@@ -41,7 +43,7 @@
 | role | string | 角色/方向 |
 | description | text | 简介 |
 | url | string | 链接 |
-| avatar | file | 头像 |
+| avatar | file | 头像。若为 file 类型，前端需拼接 `${DIRECTUS_URL}/assets/${fileId}`（TODO：当前 `lib/directus.ts` 的 `getFriends` 未做此转换，直接返回原始字段，需后续补齐） |
 | tags | json | 标签数组 |
 
 ## API 权限

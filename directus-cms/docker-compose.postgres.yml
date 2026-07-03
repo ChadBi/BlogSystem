@@ -2,22 +2,22 @@ services:
   postgres:
     image: postgres:16
     container_name: blog_postgres
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_DB: blog
       POSTGRES_USER: blog_user
-      POSTGRES_PASSWORD: blog_password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
 
   directus:
-    image: directus/directus:latest
+    image: directus/directus:11.17.0
     container_name: blog_directus
-    restart: always
+    restart: unless-stopped
     ports:
-      - "8055:8055"
+      - "127.0.0.1:8055:8055"
     depends_on:
       - postgres
     environment:

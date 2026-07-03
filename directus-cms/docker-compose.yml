@@ -1,14 +1,21 @@
 services:
-    directus:
-        image: directus/directus:11.17.0
-        ports:
-            - 8055:8055
-        volumes:
-            - ./database:/directus/database
-            - ./uploads:/directus/uploads
-            - ./extensions:/directus/extensions
-        environment:
-            SECRET: "replace-with-random-value"
-            DB_CLIENT: "sqlite3"
-            DB_FILENAME: "/directus/database/data.db"
-            WEBSOCKETS_ENABLED: "true"
+  directus:
+    image: ghcr.io/directus/directus
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:8055:8055
+    volumes:
+      - ./database:/directus/database
+      - ./uploads:/directus/uploads
+      - ./extensions:/directus/extensions
+    environment:
+      KEY: ${DIRECTUS_KEY}
+      SECRET: ${DIRECTUS_SECRET}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      DB_CLIENT: sqlite3
+      DB_FILENAME: /directus/database/data.db
+      PUBLIC_URL: ${DIRECTUS_PUBLIC_URL:-http://localhost:8055}
+      WEBSOCKETS_ENABLED: "true"
+      CORS_ENABLED: "true"
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
