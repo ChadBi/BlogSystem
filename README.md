@@ -11,19 +11,24 @@
 ## 项目结构
 
 ```
-blog-system/
+BlogSystem/
 ├── blog-frontend/      # Next.js 前端
 │   ├── app/            # 页面路由
 │   │   ├── about/      # 关于页面
+│   │   ├── admin/      # 管理后台（仪表盘 + 编辑器，需登录）
 │   │   ├── archive/    # 归档页面
 │   │   ├── categories/ # 分类页面
-│   │   ├── dashboard/  # 仪表盘
-│   │   ├── editor/     # 编辑器
 │   │   ├── friends/    # 友链页面
+│   │   ├── login/      # 登录页
 │   │   ├── posts/      # 文章页面
 │   │   └── search/     # 搜索页面
-│   └── components/     # 组件库
+│   ├── components/     # 组件库
+│   ├── lib/            # 数据层与工具
+│   ├── types/          # TypeScript 类型
+│   ├── public/         # 静态资源
+│   └── docs/           # 前端文档
 ├── directus-cms/       # Directus CMS 配置
+│   └── .env.example    # 环境变量示例
 └── docs/               # 项目文档
 ```
 
@@ -74,6 +79,24 @@ pnpm dev
 ```bash
 cp blog-frontend/.env.example blog-frontend/.env.local
 ```
+
+### 前端（`blog-frontend/.env.local`）
+
+| 变量 | 说明 | 示例 |
+|------|------|------|
+| `DIRECTUS_URL` | Directus API 地址（仅服务端，不要加 NEXT_PUBLIC_ 前缀） | `http://localhost:8055` |
+| `DIRECTUS_STATIC_TOKEN` | Directus 静态 Token（仅服务端） | `xxxx` |
+| `NEXT_PUBLIC_SITE_URL` | 站点 URL（用于 metadataBase） | `http://localhost:3000` |
+
+### Directus（`directus-cms/.env`）
+
+| 变量 | 说明 |
+|------|------|
+| `DIRECTUS_KEY` | JWT 轮换密钥（随机字符串） |
+| `DIRECTUS_SECRET` | JWT 签名密钥（随机字符串） |
+| `ADMIN_EMAIL` | 管理员邮箱 |
+| `ADMIN_PASSWORD` | 管理员密码（≥12 位强密码） |
+| `CORS_ORIGIN` | 允许的前端域名 |
 
 ## 许可证
 

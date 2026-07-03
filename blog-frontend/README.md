@@ -12,8 +12,7 @@
 - 搜索结果 `/search`
 - 关于我 `/about`
 - 好友页 `/friends`
-- 写作编辑器原型 `/editor`
-- 后台仪表盘原型 `/dashboard`
+- 管理后台 `/admin`（需登录，含仪表盘与写作编辑器；导航中不暴露入口，需手动访问 URL）
 
 ## 快速启动
 
@@ -29,6 +28,15 @@ pnpm dev
 http://localhost:3000
 ```
 
+## 管理后台
+
+后台路径为 `/admin`，需要登录密码。在 `.env.local` 中配置：
+
+- `ADMIN_PASSWORD`：登录密码
+- `AUTH_SECRET`：HMAC 签名密钥（生成方式：`openssl rand -base64 32`）
+
+未登录访问 `/admin` 会自动重定向到 `/login`。
+
 ## Directus 本地后台
 
 ```bash
@@ -41,16 +49,11 @@ pnpm directus:up
 http://localhost:8055
 ```
 
-默认账号：
-
-```txt
-admin@example.com
-admin123456
-```
+管理员账号请通过环境变量配置，参见 `directus-cms/.env.example`。
 
 ## 数据来源
 
-默认优先读取 Directus API。若 `.env.local` 中没有配置 `NEXT_PUBLIC_DIRECTUS_URL`，或请求失败，则自动使用 `lib/mock-data.ts` 中的模拟数据，方便先看页面效果。
+默认优先读取 Directus API。若 `.env.local` 中没有配置 `DIRECTUS_URL`，或请求失败，则自动使用 `lib/mock-data.ts` 中的模拟数据，方便先看页面效果。
 
 ## 推荐 Directus 集合
 

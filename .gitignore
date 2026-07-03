@@ -43,7 +43,13 @@ logs/
 directus-cms/database/
 directus-cms/uploads/
 directus-cms/extensions/
+directus-cms/postgres-data/
+blog-frontend/directus/
+directus-cms/.env
 
 # 临时文件
 *.tmp
 *.temp
+
+# pnpm 本地缓存（Windows + pnpm 环境产生）
+blog-frontend/.pnpm-store/

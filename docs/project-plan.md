@@ -25,11 +25,11 @@
 V1 验收标准：
 
 - [ ] 后台登录 Directus（`http://localhost:8055`），可新增/编辑/发布文章；
-- [ ] 前台首页、文章列表、文章详情页都能读取到已发布文章；
-- [ ] 分类、标签、时间线、搜索、好友、关于都有对应页面且能读到数据；
-- [ ] 文章支持封面图，正文使用 Markdown 渲染，代码块有语法高亮；
-- [ ] 移动端可正常浏览；
-- [ ] 提供完整的模拟数据回退方案（无 Directus 也能看到完整页面效果）。
+- [x] 前台首页、文章列表、文章详情页都能读取到已发布文章；
+- [x] 分类、标签、时间线、搜索、好友、关于都有对应页面且能读到数据；
+- [x] 文章支持封面图，正文使用 Markdown 渲染，代码块有语法高亮；
+- [x] 移动端可正常浏览；
+- [x] 提供完整的模拟数据回退方案（无 Directus 也能看到完整页面效果）。
 
 ### 1.3 V1 明确不做
 
@@ -95,7 +95,7 @@ V1 验收标准：
 │   │   ├── StatsGrid.tsx
 │   │   ├── Timeline.tsx
 │   │   ├── Logo.tsx
-│   │   └── SharkMascot.tsx
+│   │   └── BrandMark.tsx
 │   ├── lib/
 │   │   ├── directus.ts       Directus API 封装（失败回退 mock）
 │   │   ├── mock-data.ts      模拟数据（文章、分类、标签、好友）
@@ -106,9 +106,7 @@ V1 验收标准：
 │   │   ├── generated-assets/ 像素风插画
 │   │   └── images/           占位封面
 │   ├── docs/
-│   │   ├── tech-stack.md     技术栈说明
 │   │   └── directus-schema.md Directus 集合建议
-│   ├── docker-compose.yml    启动 Directus
 │   └── package.json
 ├── directus-cms/             Directus 容器挂载目录
 │   ├── docker-compose.yml    Directus 启动配置（SQLite）
@@ -117,7 +115,6 @@ V1 验收标准：
 │   └── extensions/           扩展
 └── docs/                     项目文档（根级别）
     ├── 个人博客第一版重构实施文档.md
-    ├── 技术栈.md
     └── project-plan.md       ← 你正在看的这一份
 ```
 
@@ -449,3 +446,5 @@ V3 → 站点设置集合、RSS / Sitemap、浏览量埋点、AI 摘要。
 ---
 
 文档结束。
+
+> 注：本规划文档部分内容已由 fix-critical-issues-v1 spec 更新，详见 .trae/specs/fix-critical-issues-v1/
