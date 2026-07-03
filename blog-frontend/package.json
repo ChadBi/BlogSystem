@@ -7,13 +7,16 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "directus:up": "docker compose up -d",
-    "directus:down": "docker compose down"
+    "directus:up": "docker compose -f ../directus-cms/docker-compose.yml up -d",
+    "directus:down": "docker compose -f ../directus-cms/docker-compose.yml down"
   },
   "dependencies": {
     "@directus/sdk": "^17.0.0",
+    "gsap": "^3.15.0",
     "highlight.js": "^11.11.1",
+    "motion": "^12.42.2",
     "next": "^14.2.5",
+    "p5": "^2.3.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-markdown": "^10.1.0",
