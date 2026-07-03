@@ -179,7 +179,7 @@ export function AdminEditor({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="请输入文章标题（必填）"
-          className="mb-4 w-full rounded-xl border-2 border-ocean-800/20 bg-white px-4 py-4 text-xl font-bold outline-none focus:border-coral"
+          className="mb-4 w-full rounded-xl border-2 border-ocean-800/20 bg-white px-4 py-4 text-xl font-bold outline-none focus:border-accent"
         />
 
         {/* Slug */}
@@ -189,7 +189,7 @@ export function AdminEditor({
               type="checkbox"
               checked={autoSlug}
               onChange={(e) => setAutoSlug(e.target.checked)}
-              className="accent-coral"
+              className="[accent-color:var(--accent)]"
             />
             自动生成
           </label>
@@ -198,7 +198,7 @@ export function AdminEditor({
             onChange={(e) => setSlug(e.target.value)}
             placeholder="url-slug"
             disabled={autoSlug}
-            className="flex-1 rounded-xl border-2 border-ocean-800/20 bg-white px-4 py-2 font-mono text-sm outline-none focus:border-coral disabled:bg-ocean-50 disabled:text-slate-500"
+            className="flex-1 rounded-xl border-2 border-ocean-800/20 bg-white px-4 py-2 font-mono text-sm outline-none focus:border-accent disabled:bg-ocean-50 disabled:text-slate-500"
           />
         </div>
 
@@ -220,7 +220,7 @@ export function AdminEditor({
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder={'在这里开始写作吧...\n支持 Markdown 语法'}
-          className="min-h-[520px] w-full rounded-2xl border-2 border-ocean-800/20 bg-white/70 p-5 font-mono text-sm outline-none focus:border-coral"
+          className="min-h-[520px] w-full rounded-2xl border-2 border-ocean-800/20 bg-white/70 p-5 font-mono text-sm outline-none focus:border-accent"
         />
 
         {/* 摘要 */}
@@ -230,7 +230,7 @@ export function AdminEditor({
             value={summary}
             onChange={(e) => setSummary(e.target.value)}
             placeholder="一句话总结这篇文章"
-            className="min-h-[80px] w-full rounded-xl border-2 border-ocean-800/20 bg-white/70 p-3 text-sm outline-none focus:border-coral"
+            className="min-h-[80px] w-full rounded-xl border-2 border-ocean-800/20 bg-white/70 p-3 text-sm outline-none focus:border-accent"
           />
         </div>
 
@@ -261,7 +261,7 @@ export function AdminEditor({
             type="button"
             onClick={() => handleSubmit('published')}
             disabled={submitting}
-            className="rounded-xl bg-coral px-5 py-3 font-black text-white shadow-pixel disabled:opacity-50"
+            className="rounded-xl bg-accent px-5 py-3 font-black text-white shadow-pixel disabled:opacity-50 dark:bg-accent-dark dark:text-ocean-900"
           >
             {submitting ? '发布中...' : '发布文章'}
           </button>
@@ -283,7 +283,7 @@ export function AdminEditor({
             <button
               type="button"
               onClick={() => setStatus('published')}
-              className={`flex-1 rounded-xl px-3 py-2 text-sm font-bold ${status === 'published' ? 'bg-coral text-white' : 'bg-white/60 text-slate-600'}`}
+              className={`flex-1 rounded-xl px-3 py-2 text-sm font-bold ${status === 'published' ? 'bg-accent text-white dark:bg-accent-dark dark:text-ocean-900' : 'bg-white/60 text-slate-600'}`}
             >
               已发布
             </button>
@@ -299,7 +299,7 @@ export function AdminEditor({
           <select
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value === '' ? '' : Number(e.target.value))}
-            className="w-full rounded-xl border-2 border-ocean-800/20 bg-white px-3 py-2 text-sm font-bold outline-none focus:border-coral"
+            className="w-full rounded-xl border-2 border-ocean-800/20 bg-white px-3 py-2 text-sm font-bold outline-none focus:border-accent"
           >
             <option value="">未分类</option>
             {categories.map((c) => (
@@ -319,7 +319,7 @@ export function AdminEditor({
                 onClick={() => toggleTag(Number(t.id))}
                 className={`rounded-full px-3 py-1 text-xs font-bold transition ${
                   tagIds.includes(Number(t.id))
-                    ? 'bg-coral text-white'
+                    ? 'bg-accent text-white dark:bg-accent-dark dark:text-ocean-900'
                     : 'bg-white/60 text-slate-600 hover:bg-ocean-100'
                 }`}
               >

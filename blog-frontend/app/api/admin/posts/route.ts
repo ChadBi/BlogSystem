@@ -8,7 +8,7 @@ export async function GET() {
     return NextResponse.json({ error: session.error }, { status: session.status });
   }
   const result = await adminFetch(
-    '/items/posts?sort=-published_at&fields=id,title,slug,status,published_at,category.name,views,likes,comments'
+    '/items/posts?sort=-published_at&fields=id,title,slug,status,published_at,category.name,views'
   );
   if (result.error) {
     return NextResponse.json({ error: result.error }, { status: result.status });
@@ -48,8 +48,6 @@ export async function POST(request: Request) {
     category: body.category ?? null,
     tags: Array.isArray(body.tags) ? body.tags : [],
     views: 0,
-    likes: 0,
-    comments: 0,
   };
 
   const result = await adminFetch('/items/posts', {

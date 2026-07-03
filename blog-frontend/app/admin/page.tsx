@@ -99,18 +99,14 @@ export default async function AdminPage({
       published_at: string | null;
       category: { name: string } | null;
       views: number;
-      likes: number;
-      comments: number;
     }>;
-  }>('/items/posts?sort=-published_at&fields=id,title,slug,status,published_at,category.name,views,likes,comments');
+  }>('/items/posts?sort=-published_at&fields=id,title,slug,status,published_at,category.name,views');
 
   const allPosts = allPostsResult.data?.data ?? [];
   const stats = computeSiteStats(publishedPosts);
   const metrics: [string, string, string][] = [
     ['文章总数', formatStat(stats.posts), `${allPosts.filter(p => p.status === 'draft').length} 草稿`],
     ['总访问量', formatStat(stats.views), '—'],
-    ['获赞总数', formatStat(stats.likes), '—'],
-    ['评论总数', formatStat(stats.comments), '—'],
     ['访客总数', '3.8k', '示例数据'],
     ['资源文件', '312', '示例数据'],
   ];
@@ -120,7 +116,7 @@ export default async function AdminPage({
       <AdminShell view="dashboard">
         <section className="space-y-6">
           <header>
-            <h2 className="text-3xl font-black">欢迎回来，Shark! 👋</h2>
+            <h2 className="text-3xl font-black">欢迎回来，Shark</h2>
             <p className="mt-2 text-slate-500">这是网站的实时数据概览与文章管理。</p>
           </header>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -137,7 +133,7 @@ export default async function AdminPage({
               <h2 className="text-2xl font-black">文章管理</h2>
               <a
                 href="/admin?view=editor"
-                className="rounded-xl bg-coral px-4 py-2 text-sm font-black text-white shadow-pixel hover:opacity-90"
+                className="rounded-xl bg-accent px-4 py-2 text-sm font-black text-white shadow-pixel hover:opacity-90 dark:bg-accent-dark dark:text-ocean-900"
               >
                 + 新建文章
               </a>

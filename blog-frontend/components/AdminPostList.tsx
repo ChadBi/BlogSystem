@@ -12,8 +12,6 @@ type PostRow = {
   published_at: string | null;
   category?: { name: string } | null;
   views: number;
-  likes: number;
-  comments: number;
 };
 
 function formatDate(iso: string | null): string {
