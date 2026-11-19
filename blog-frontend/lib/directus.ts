@@ -1,4 +1,5 @@
 import 'server-only';
+import { cache } from 'react';
 
 import { categories, friends, posts, tags } from '@/lib/mock-data';
 import type { Category, Friend, Post, Tag } from '@/types/post';
@@ -35,7 +36,7 @@ async function fetchDirectus<T>(path: string): Promise<T | null> {
   }
 }
 
-function normalizePost(item: DirectusItem): Post {
+function normalizePost(item: DirectusItem, knownTags: Tag[] = []): Post {
   const category: Category = item.category
     ? {
         id: String(item.category.id ?? item.category.slug),
@@ -52,17 +53,21 @@ function normalizePost(item: DirectusItem): Post {
         icon: '📦'
       };
 
-  const normalizedTags: Tag[] = Array.isArray(item.tags)
-    ? item.tags.map((row: any) => {
-        const tag = row.tags_id ?? row;
+  const tagRows = Array.isArray(item.tags) ? item.tags : item.tags ? [item.tags] : [];
+  const normalizedTags: Tag[] = tagRows
+      .map((row: any): Tag | null => {
+        const value = row?.tags_id ?? row;
+        const tag = typeof value === 'object' && value?.name
+          ? value
+          : knownTags.find((candidate) => String(candidate.id) === String(value?.id ?? value));
+        if (!tag) return null;
         return {
           id: String(tag.id ?? tag.slug),
           name: tag.name,
           slug: tag.slug,
           color: tag.color
         };
-      })
-    : [];
+      }).filter((tag: Tag | null): tag is Tag => Boolean(tag?.name && tag?.slug));
 
   return {
     id: String(item.id),
@@ -81,27 +86,41 @@ function normalizePost(item: DirectusItem): Post {
   };
 }
 
+export const getPostCollection = cache(async () => {
+  const [data, tagData] = await Promise.all([
+    fetchDirectus<{ data: DirectusItem[] }>(
+      '/items/posts?limit=-1&filter[status][_eq]=published&sort=-published_at&fields=*,category.*,tags.*'
+    ),
+    fetchDirectus<{ data: Tag[] }>('/items/tags?limit=-1&sort=name'),
+  ]);
+  const items = data?.data?.map((item) => normalizePost(item, tagData?.data));
+  return {
+    posts: items ?? posts.filter((post) => post.status === 'published'),
+    notice: items ? undefined : DIRECTUS_URL ? '文章服务暂时无法读取，当前展示示例文章。' : '当前为演示模式，展示示例文章。',
+  };
+});
+
 export async function getPosts(): Promise<Post[]> {
-  const data = await fetchDirectus<{ data: DirectusItem[] }>(
-    '/items/posts?filter[status][_eq]=published&sort=-published_at&fields=*,category.*,tags.tags_id.*'
-  );
-  return data?.data?.map(normalizePost) ?? posts;
+  return (await getPostCollection()).posts;
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | undefined> {
-  const data = await fetchDirectus<{ data: DirectusItem[] }>(
-    `/items/posts?filter[slug][_eq]=${encodeURIComponent(slug)}&filter[status][_eq]=published&fields=*,category.*,tags.tags_id.*&limit=1`
-  );
+  const [data, tagData] = await Promise.all([
+    fetchDirectus<{ data: DirectusItem[] }>(
+      `/items/posts?filter[slug][_eq]=${encodeURIComponent(slug)}&filter[status][_eq]=published&fields=*,category.*,tags.*&limit=1`
+    ),
+    fetchDirectus<{ data: Tag[] }>('/items/tags?limit=-1&sort=name'),
+  ]);
   // Directus 已配置但返回空（文章不存在或未发布）→ 返回 undefined 触发 notFound()
   // 仅当 Directus 完全不可达（data === null）时才回退 mock
   if (data === null) {
-    return posts.find((post) => post.slug === slug);
+    return posts.find((post) => post.status === 'published' && post.slug === slug);
   }
-  return data.data?.[0] ? normalizePost(data.data[0]) : undefined;
+  return data.data?.[0] ? normalizePost(data.data[0], tagData?.data) : undefined;
 }
 
 export async function getCategories(): Promise<Category[]> {
-  const data = await fetchDirectus<{ data: DirectusItem[] }>('/items/categories?sort=name');
+  const data = await fetchDirectus<{ data: DirectusItem[] }>('/items/categories?limit=-1&sort=name');
   const raw: Category[] = data
     ? data.data.map((item) => ({
         id: String(item.id),
@@ -109,7 +128,7 @@ export async function getCategories(): Promise<Category[]> {
         slug: item.slug,
         description: item.description ?? '',
         icon: item.icon ?? '🧱'
-      }))
+      })).filter((category) => Boolean(category.name && category.slug))
     : categories;
   // 从 posts 聚合 count（Directus 不自动返回关联计数）
   const allPosts = await getPosts();
@@ -137,10 +156,11 @@ export async function getTags(): Promise<Tag[]> {
     const allPosts = await getPosts();
     return computeTagCounts(tags, allPosts);
   };
-  const data = await fetchDirectus<{ data: Tag[] }>('/items/tags?sort=name');
+  const data = await fetchDirectus<{ data: Tag[] }>('/items/tags?limit=-1&sort=name');
   if (!data) return fallback();
   const allPosts = await getPosts();
-  return computeTagCounts(data.data, allPosts);
+  const validTags = data.data.filter((tag) => Boolean(tag?.name && tag?.slug)).map((tag) => ({ ...tag, id: String(tag.id) }));
+  return computeTagCounts(validTags, allPosts);
 }
 
 export async function getFriends(): Promise<Friend[]> {

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { adminFetch, requireAdminSession } from '@/lib/directus-admin';
+import { revalidatePath } from 'next/cache';
+import { adminFetch, requireAdminSession, usesSinglePostTag } from '@/lib/directus-admin';
 
 // GET /api/admin/posts/[id] — 获取单篇文章（编辑模式回填）
 export async function GET(
@@ -11,7 +12,7 @@ export async function GET(
     return NextResponse.json({ error: session.error }, { status: session.status });
   }
   const result = await adminFetch(
-    `/items/posts/${params.id}?fields=*,category.id,tags.tags_id.id`
+    `/items/posts/${params.id}?fields=*,category.id,tags.*`
   );
   if (result.error) {
     return NextResponse.json({ error: result.error }, { status: result.status });
@@ -54,6 +55,13 @@ export async function PATCH(
     return NextResponse.json({ error: '没有要更新的字段' }, { status: 400 });
   }
 
+  if ('tags' in allowed && await usesSinglePostTag()) {
+    if (allowed.tags.length > 1) {
+      return NextResponse.json({ error: '当前 CMS 标签关联支持单选，请选择一个标签。' }, { status: 400 });
+    }
+    allowed.tags = allowed.tags[0] ?? null;
+  }
+
   const result = await adminFetch(`/items/posts/${params.id}`, {
     method: 'PATCH',
     body: JSON.stringify(allowed),
@@ -61,6 +69,7 @@ export async function PATCH(
   if (result.error) {
     return NextResponse.json({ error: result.error }, { status: result.status });
   }
+  revalidatePath('/', 'layout');
   return NextResponse.json({ data: result.data?.data });
 }
 
@@ -79,5 +88,6 @@ export async function DELETE(
   if (result.error) {
     return NextResponse.json({ error: result.error }, { status: result.status });
   }
+  revalidatePath('/', 'layout');
   return NextResponse.json({ ok: true });
 }

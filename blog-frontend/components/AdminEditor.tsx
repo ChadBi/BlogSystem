@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Category, Tag } from '@/types/post';
 
@@ -31,10 +31,12 @@ export function AdminEditor({
   categories,
   tags,
   post,
+  singleTag,
 }: {
   categories: Category[];
   tags: Tag[];
   post: AdminPost | null;
+  singleTag: boolean;
 }) {
   const router = useRouter();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -52,6 +54,44 @@ export function AdminEditor({
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const initialSnapshot = useRef(JSON.stringify({ title: post?.title ?? '', slug: post?.slug ?? '', summary: post?.summary ?? '', content: post?.content ?? '', categoryId: post?.category ?? '', tagIds: post?.tags ?? [], status: post?.status ?? 'draft' }));
+  const currentSnapshot = useMemo(() => JSON.stringify({ title, slug, summary, content, categoryId, tagIds, status }), [title, slug, summary, content, categoryId, tagIds, status]);
+  const hasUnsavedChanges = currentSnapshot !== initialSnapshot.current;
+
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!hasUnsavedChanges && !submitting) return;
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    const handleNavigation = (event: MouseEvent) => {
+      if ((!hasUnsavedChanges && !submitting) || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const target = event.target instanceof Element
+        ? event.target.closest('a[href], button[data-leave-editor]')
+        : null;
+      if (!target) return;
+      if (target instanceof HTMLAnchorElement) {
+        if (target.target === '_blank' || target.hasAttribute('download') || target.hasAttribute('data-document-navigation')) return;
+        const destination = new URL(target.href);
+        if (destination.pathname === window.location.pathname && destination.search === window.location.search) return;
+      }
+      if (!confirm('当前内容尚未保存，确定离开吗？')) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('click', handleNavigation, true);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('click', handleNavigation, true);
+    };
+  }, [hasUnsavedChanges, submitting]);
+
+  function leaveEditor() {
+    if (hasUnsavedChanges && !confirm('当前内容尚未保存，确定离开吗？')) return;
+    router.push('/admin');
+  }
 
   // 标题变化时自动同步 slug（仅新建模式）
   useEffect(() => {
@@ -62,7 +102,7 @@ export function AdminEditor({
 
   function toggleTag(id: number) {
     setTagIds((prev) =>
-      prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((t) => t !== id) : singleTag ? [id] : [...prev, id]
     );
   }
 
@@ -90,7 +130,6 @@ export function AdminEditor({
     if (!ta) return;
     const start = ta.selectionStart;
     const before = content.slice(0, start);
-    const after = content.slice(start);
     // 找到当前行行首
     const lineStart = before.lastIndexOf('\n') + 1;
     const newText = content.slice(0, lineStart) + prefix + content.slice(lineStart);
@@ -102,13 +141,13 @@ export function AdminEditor({
   }
 
   async function handleSubmit(targetStatus: 'draft' | 'published') {
+    if (submitting || deleting || success) return;
     setError('');
     setSuccess('');
     if (!title.trim()) { setError('标题必填'); return; }
     if (!slug.trim()) { setError('slug 必填'); return; }
 
     setSubmitting(true);
-    setStatus(targetStatus);
     const payload = {
       title: title.trim(),
       slug: slug.trim(),
@@ -133,7 +172,9 @@ export function AdminEditor({
         setError(data.error || '保存失败');
         return;
       }
-      setSuccess(targetStatus === 'published' ? '文章已发布' : '草稿已保存');
+      initialSnapshot.current = JSON.stringify({ title, slug, summary, content, categoryId, tagIds, status: targetStatus });
+      setStatus(targetStatus);
+      setSuccess(targetStatus === 'published' ? '文章已发布，即将返回文章管理' : '草稿已保存，即将返回文章管理');
       // 保存成功后跳回仪表盘
       setTimeout(() => {
         router.push('/admin');
@@ -147,7 +188,7 @@ export function AdminEditor({
   }
 
   async function handleDelete() {
-    if (!post) return;
+    if (!post || submitting || deleting) return;
     if (!confirm(`确认删除文章「${post.title}」？此操作不可恢复。`)) return;
     setError('');
     setDeleting(true);
@@ -168,14 +209,21 @@ export function AdminEditor({
   }
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[1fr_320px]">
+    <fieldset disabled={submitting || deleting || Boolean(success)} className="grid min-w-0 gap-6 xl:grid-cols-[1fr_320px]">
       <section className="pixel-card rounded-3xl p-6">
-        <h2 className="mb-5 text-3xl font-black">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-3xl font-black">
           {post ? '编辑文章' : '写作编辑器'} / WRITING
-        </h2>
+          </h2>
+          <span className={`text-sm font-bold ${submitting ? 'text-accent' : hasUnsavedChanges ? 'text-amber-600' : 'text-emerald-600'}`} aria-live="polite">
+            {submitting ? '保存中…' : error ? '保存失败，请重试' : hasUnsavedChanges ? '有未保存修改' : post || success ? '已保存' : '新建文章'}
+          </span>
+        </div>
 
         {/* 标题 */}
+        <label htmlFor="editor-title" className="sr-only">文章标题</label>
         <input
+          id="editor-title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="请输入文章标题（必填）"
@@ -193,7 +241,9 @@ export function AdminEditor({
             />
             自动生成
           </label>
+          <label htmlFor="editor-slug" className="sr-only">文章 slug</label>
           <input
+            id="editor-slug"
             value={slug}
             onChange={(e) => setSlug(e.target.value)}
             placeholder="url-slug"
@@ -215,7 +265,9 @@ export function AdminEditor({
         </div>
 
         {/* 正文 */}
+        <label htmlFor="editor-content" className="sr-only">Markdown 正文</label>
         <textarea
+          id="editor-content"
           ref={textareaRef}
           value={content}
           onChange={(e) => setContent(e.target.value)}
@@ -225,8 +277,9 @@ export function AdminEditor({
 
         {/* 摘要 */}
         <div className="mt-4">
-          <label className="mb-2 block text-sm font-bold text-slate-600">摘要 / SUMMARY</label>
+          <label htmlFor="editor-summary" className="mb-2 block text-sm font-bold text-slate-600">摘要 / SUMMARY</label>
           <textarea
+            id="editor-summary"
             value={summary}
             onChange={(e) => setSummary(e.target.value)}
             placeholder="一句话总结这篇文章"
@@ -235,10 +288,13 @@ export function AdminEditor({
         </div>
 
         {/* 反馈与操作 */}
-        {error && <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm font-bold text-red-600">{error}</p>}
-        {success && <p className="mt-4 rounded-xl bg-emerald-50 p-3 text-sm font-bold text-emerald-700">{success}</p>}
+        {error && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-sm font-bold text-red-600">{error}</p>}
+        {success && <p role="status" className="mt-4 rounded-xl bg-emerald-50 p-3 text-sm font-bold text-emerald-700">{success}</p>}
 
         <div className="mt-5 flex flex-wrap justify-end gap-3">
+          <button type="button" onClick={leaveEditor} className="rounded-xl border-2 border-ocean-800/20 px-5 py-3 font-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
+            返回管理
+          </button>
           {post && (
             <button
               type="button"
@@ -269,78 +325,157 @@ export function AdminEditor({
       </section>
 
       <aside className="space-y-4">
-        {/* 状态 */}
-        <div className="pixel-card">
-          <h3 className="mb-3 font-black">文章状态 / STATUS</h3>
-          <div className="flex gap-2">
+        {/* 状态 - 视觉化状态轨道 */}
+        <div className="pixel-card pixel-corner">
+          <header className="mb-3 flex items-baseline justify-between">
+            <h3 className="font-black tracking-tight">文章状态</h3>
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-400">STATUS</span>
+          </header>
+          <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
+              aria-pressed={status === 'draft'}
               onClick={() => setStatus('draft')}
-              className={`flex-1 rounded-xl px-3 py-2 text-sm font-bold ${status === 'draft' ? 'bg-ocean-200 text-ocean-900' : 'bg-white/60 text-slate-600'}`}
+              className={`group relative overflow-hidden rounded-xl border-2 px-3 py-3 text-left transition ${
+                status === 'draft'
+                  ? 'border-ocean-400 bg-ocean-100 dark:border-ocean-500 dark:bg-ocean-900/40'
+                  : 'border-ocean-800/15 bg-white/60 hover:border-ocean-300 dark:border-ocean-400/15 dark:bg-surface/60'
+              }`}
             >
-              草稿
+              <div className="flex items-center gap-2">
+                <span className={`h-2 w-2 rounded-full ${status === 'draft' ? 'bg-ocean-500' : 'bg-slate-300'}`} />
+                <span className="text-sm font-black">草稿</span>
+              </div>
+              <p className="mt-1 text-[11px] leading-tight text-slate-500 dark:text-slate-400">仅博主可见</p>
             </button>
             <button
               type="button"
+              aria-pressed={status === 'published'}
               onClick={() => setStatus('published')}
-              className={`flex-1 rounded-xl px-3 py-2 text-sm font-bold ${status === 'published' ? 'bg-accent text-white dark:bg-accent-dark dark:text-ocean-900' : 'bg-white/60 text-slate-600'}`}
+              className={`group relative overflow-hidden rounded-xl border-2 px-3 py-3 text-left transition ${
+                status === 'published'
+                  ? 'border-accent bg-accent/10 dark:border-accent-dark dark:bg-accent-dark/15'
+                  : 'border-ocean-800/15 bg-white/60 hover:border-accent/50 dark:border-ocean-400/15 dark:bg-surface/60'
+              }`}
             >
-              已发布
+              <div className="flex items-center gap-2">
+                <span className={`h-2 w-2 rounded-full ${status === 'published' ? 'bg-accent dark:bg-accent-dark' : 'bg-slate-300'}`} />
+                <span className="text-sm font-black">已发布</span>
+              </div>
+              <p className="mt-1 text-[11px] leading-tight text-slate-500 dark:text-slate-400">前台可见</p>
             </button>
           </div>
-          <p className="mt-2 text-xs text-slate-500">
-            点击下方按钮提交时，状态会同步为按钮对应的状态。
+          <p className="mt-3 font-mono text-[10px] leading-relaxed text-slate-400">
+            下方「保存草稿 / 发布文章」按钮会同步此状态。
           </p>
         </div>
 
-        {/* 分类 */}
+        {/* 分类 - chip 网格 + select fallback */}
         <div className="pixel-card">
-          <h3 className="mb-3 font-black">分类 / CATEGORY</h3>
-          <select
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value === '' ? '' : Number(e.target.value))}
-            className="w-full rounded-xl border-2 border-ocean-800/20 bg-white px-3 py-2 text-sm font-bold outline-none focus:border-accent"
-          >
-            <option value="">未分类</option>
-            {categories.map((c) => (
-              <option key={c.id} value={Number(c.id)}>{c.icon} {c.name}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* 标签 */}
-        <div className="pixel-card">
-          <h3 className="mb-3 font-black">标签 / TAGS</h3>
-          <div className="flex flex-wrap gap-2">
-            {tags.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => toggleTag(Number(t.id))}
-                className={`rounded-full px-3 py-1 text-xs font-bold transition ${
-                  tagIds.includes(Number(t.id))
-                    ? 'bg-accent text-white dark:bg-accent-dark dark:text-ocean-900'
-                    : 'bg-white/60 text-slate-600 hover:bg-ocean-100'
-                }`}
-              >
-                {t.name}
-              </button>
-            ))}
+          <header className="mb-3 flex items-baseline justify-between">
+            <h3 className="font-black tracking-tight">分类</h3>
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-400">CATEGORY</span>
+          </header>
+          <div className="grid grid-cols-2 gap-1.5">
+            <button
+              type="button"
+              aria-pressed={categoryId === ''}
+              onClick={() => setCategoryId('')}
+              className={`rounded-lg border px-2.5 py-2 text-left text-xs font-bold transition ${
+                categoryId === ''
+                  ? 'border-accent bg-accent/10 text-accent dark:border-accent-dark dark:bg-accent-dark/15 dark:text-accent-dark'
+                  : 'border-ocean-800/15 bg-white/50 text-slate-600 hover:border-ocean-300 dark:border-ocean-400/15 dark:bg-surface/50 dark:text-slate-300'
+              }`}
+            >
+              未分类
+            </button>
+            {categories.map((c) => {
+              const active = categoryId === Number(c.id);
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setCategoryId(Number(c.id))}
+                  className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-2 text-left text-xs font-bold transition ${
+                    active
+                      ? 'border-accent bg-accent/10 text-accent dark:border-accent-dark dark:bg-accent-dark/15 dark:text-accent-dark'
+                      : 'border-ocean-800/15 bg-white/50 text-slate-600 hover:border-ocean-300 dark:border-ocean-400/15 dark:bg-surface/50 dark:text-slate-300'
+                  }`}
+                >
+                  <span className="text-sm leading-none">{c.icon}</span>
+                  <span className="truncate">{c.name}</span>
+                </button>
+              );
+            })}
           </div>
-          {tags.length === 0 && <p className="text-xs text-slate-500">暂无标签</p>}
+          {categories.length === 0 && (
+            <p className="mt-2 font-mono text-[11px] text-slate-400">暂无分类，请先在 Directus 后台添加</p>
+          )}
         </div>
 
-        {/* 小贴士 */}
+        {/* 标签 - 计数 + 选中态 */}
         <div className="pixel-card">
-          <h3 className="mb-3 font-black">写作小贴士 / TIPS</h3>
-          <ul className="list-disc space-y-2 pl-5 text-sm text-slate-600">
-            <li>使用 Markdown 提升写作效率</li>
-            <li>合理使用标题层级 H2-H3</li>
-            <li>slug 影响文章 URL，建议用英文</li>
-            <li>保存草稿不会出现在前台</li>
+          <header className="mb-3 flex items-baseline justify-between">
+            <h3 className="font-black tracking-tight">标签</h3>
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-400">
+              {tagIds.length}/{tags.length} TAGS
+            </span>
+          </header>
+          <div className="flex flex-wrap gap-1.5">
+            {tags.map((t) => {
+              const active = tagIds.includes(Number(t.id));
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => toggleTag(Number(t.id))}
+                  className={`rounded-full border px-3 py-1 text-xs font-bold transition ${
+                    active
+                      ? 'border-accent bg-accent text-white dark:border-accent-dark dark:bg-accent-dark dark:text-ocean-900'
+                      : 'border-ocean-800/15 bg-white/50 text-slate-600 hover:border-accent/50 hover:text-accent dark:border-ocean-400/15 dark:bg-surface/50 dark:text-slate-300 dark:hover:text-accent-dark'
+                  }`}
+                >
+                  {active && <span className="mr-1 font-mono text-[10px]">✓</span>}
+                  {t.name}
+                </button>
+              );
+            })}
+          </div>
+          {singleTag && <p className="mt-2 text-xs text-slate-500">当前 CMS 标签关联支持单选。</p>}
+          {tags.length === 0 && (
+            <p className="font-mono text-[11px] text-slate-400">暂无标签</p>
+          )}
+        </div>
+
+        {/* 写作小贴士 - terminal 风格 */}
+        <div className="pixel-card relative overflow-hidden">
+          <div className="pointer-events-none absolute inset-0 bg-ocean-grid bg-[size:18px_18px] opacity-30" aria-hidden="true" />
+          <header className="relative mb-3 flex items-baseline justify-between">
+            <h3 className="font-black tracking-tight">写作小贴士</h3>
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-400">TIPS</span>
+          </header>
+          <ul className="relative space-y-2.5 font-mono text-[11px] leading-relaxed text-slate-600 dark:text-slate-300">
+            <li className="flex gap-2">
+              <span className="text-accent dark:text-accent-dark">{'>'}</span>
+              <span>使用 <span className="rounded bg-ocean-100 px-1 dark:bg-ocean-900/40">Markdown</span> 提升写作效率</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-accent dark:text-accent-dark">{'>'}</span>
+              <span>标题层级 H2-H3 保持清晰结构</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-accent dark:text-accent-dark">{'>'}</span>
+              <span>slug 影响文章 URL，建议英文</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-accent dark:text-accent-dark">{'>'}</span>
+              <span>保存草稿不会出现在前台</span>
+            </li>
           </ul>
         </div>
       </aside>
-    </div>
+    </fieldset>
   );
 }

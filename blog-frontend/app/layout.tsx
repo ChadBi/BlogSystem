@@ -17,6 +17,7 @@ export const metadata: Metadata = {
   title: 'Shark Tech Blog',
   description: 'Retro × Ocean × Code 的个人技术博客',
   keywords: ['Next.js', 'Directus', 'Tech Blog', 'Pixel Art', 'Shark'],
+  icons: { icon: '/images/favicon.svg' },
   openGraph: {
     type: 'website',
     locale: 'zh_CN',

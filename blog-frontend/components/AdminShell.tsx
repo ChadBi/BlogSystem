@@ -24,6 +24,8 @@ export function AdminShell({
       <header className="flex items-center justify-between">
         <h1 className="text-3xl font-black">管理后台 / ADMIN</h1>
         <button
+          type="button"
+          data-leave-editor
           onClick={handleLogout}
           className="rounded-xl border-2 border-ocean-800/25 px-4 py-2 text-sm font-black hover:bg-ocean-100"
         >
@@ -39,14 +41,14 @@ export function AdminShell({
         >
           仪表盘
         </Link>
-        <Link
+        <a data-document-navigation
           href="/admin?view=editor"
           className={`rounded-t-xl px-5 py-3 text-sm font-black ${
             view === 'editor' ? 'bg-accent text-white dark:bg-accent-dark dark:text-ocean-900' : 'hover:bg-ocean-100'
           }`}
         >
           写作
-        </Link>
+        </a>
       </nav>
       <div>{children}</div>
     </div>

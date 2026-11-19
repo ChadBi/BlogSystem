@@ -1,8 +1,9 @@
 import Link from 'next/link';
+import { BackButton } from '@/components/BackButton';
 import { Logo } from '@/components/Logo';
 import { MobileNav } from '@/components/MobileNav';
 import { ScrollProgress } from '@/components/ScrollProgress';
-import { MagnifyingGlass } from '@/components/icons';
+import { SearchHover } from '@/components/SearchHover';
 
 const nav = [
   { href: '/', label: '首页' },
@@ -16,9 +17,13 @@ const nav = [
 export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b-2 border-ocean-800/20 bg-shell/88 backdrop-blur-xl dark:border-ocean-400/15 dark:bg-[var(--bg)]/88">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-3 sm:px-6 lg:px-8">
-        <Link href="/" aria-label="返回首页"><Logo /></Link>
-        <nav className="hidden items-center gap-1 md:flex">
+      <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-3">
+          <BackButton />
+          <Link href="/" aria-label="返回首页"><Logo /></Link>
+        </div>
+        {/* nav 绝对居中，不受左右 BackButton/Logo 影响 */}
+        <nav className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-1 md:flex">
           {nav.map((item) => (
             <Link
               key={item.href}
@@ -29,20 +34,7 @@ export function Header() {
             </Link>
           ))}
         </nav>
-        <form
-          role="search"
-          aria-label="站内搜索"
-          action="/search"
-          className="hidden min-w-64 items-center gap-2 rounded-xl border-2 border-ocean-800/20 bg-white/70 px-3 py-2 lg:flex dark:border-ocean-400/20 dark:bg-surface/60"
-        >
-          <MagnifyingGlass size={16} className="text-slate-400" />
-          <input
-            name="q"
-            aria-label="搜索关键词"
-            placeholder="搜索文章、标签、内容..."
-            className="w-full bg-transparent text-sm outline-none dark:text-slate-100 dark:placeholder:text-slate-500"
-          />
-        </form>
+        <SearchHover />
         <MobileNav />
       </div>
       <ScrollProgress />

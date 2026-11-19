@@ -30,10 +30,8 @@ export function Typewriter({ text, speed = 0.05, className, startDelay = 0.6 }: 
 
     return () => {
       tl.kill();
-      if (containerRef.current) {
-        containerRef.current.removeAttribute('aria-label');
-        containerRef.current.textContent = text;
-      }
+      el.removeAttribute('aria-label');
+      el.textContent = text;
     };
   }, [text, speed, startDelay]);
 

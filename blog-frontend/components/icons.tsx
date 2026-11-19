@@ -87,6 +87,15 @@ export function ArrowRight({ size, ...p }: IconProps) {
   );
 }
 
+export function ArrowLeft({ size, ...p }: IconProps) {
+  return (
+    <Base size={size} {...p}>
+      <line x1="20" y1="12" x2="4" y2="12" />
+      <polyline points="10 6 4 12 10 18" />
+    </Base>
+  );
+}
+
 export function ArrowUpRight({ size, ...p }: IconProps) {
   return (
     <Base size={size} {...p}>

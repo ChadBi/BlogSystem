@@ -21,6 +21,7 @@ export async function getAdminToken(): Promise<string> {
   }
   const res = await fetch(`${DIRECTUS_URL}/auth/login`, {
     method: 'POST',
+    cache: 'no-store',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD }),
   });
@@ -30,11 +31,11 @@ export async function getAdminToken(): Promise<string> {
   }
   const data = await res.json();
   const token = data?.data?.access_token;
-  const expiresIn = data?.data?.expires ?? 900; // 默认 15 分钟
+  const expiresIn = data?.data?.expires ?? 900_000; // Directus 返回毫秒，默认 15 分钟
   if (!token) throw new Error('Directus 登录响应缺少 access_token');
   cachedToken = {
     token,
-    expiresAt: Date.now() + expiresIn * 1000,
+    expiresAt: Date.now() + expiresIn,
   };
   return token;
 }
@@ -45,15 +46,20 @@ export async function adminFetch<T = any>(
   options: RequestInit = {}
 ): Promise<{ status: number; data: T | null; error?: string }> {
   try {
-    const token = await getAdminToken();
-    const res = await fetch(`${DIRECTUS_URL}${path}`, {
+    const request = (token: string) => fetch(`${DIRECTUS_URL}${path}`, {
       ...options,
+      cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
         ...(options.headers || {}),
       },
     });
+    let res = await request(await getAdminToken());
+    if (res.status === 401) {
+      cachedToken = null;
+      res = await request(await getAdminToken());
+    }
     const text = await res.text();
     let body: any = null;
     try { body = text ? JSON.parse(text) : null; } catch { body = { raw: text }; }
@@ -68,6 +74,14 @@ export async function adminFetch<T = any>(
       error: err instanceof Error ? err.message : String(err),
     };
   }
+}
+
+// 兼容已有的单标签关联，以及 JSON / 中间表形式的多标签字段。
+export async function usesSinglePostTag(): Promise<boolean> {
+  const result = await adminFetch<{
+    data: { related_collection: string; meta: { junction_field: string | null } | null };
+  }>('/relations/posts/tags');
+  return result.data?.data.related_collection === 'tags' && !result.data.data.meta?.junction_field;
 }
 
 // 校验当前请求是否已登录前端 admin（基于 session cookie）

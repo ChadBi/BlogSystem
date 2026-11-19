@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { adminFetch, requireAdminSession } from '@/lib/directus-admin';
+import { revalidatePath } from 'next/cache';
+import { adminFetch, requireAdminSession, usesSinglePostTag } from '@/lib/directus-admin';
 
 // GET /api/admin/posts — 列出所有文章（含草稿，按时间倒序）
 export async function GET() {
@@ -8,7 +9,7 @@ export async function GET() {
     return NextResponse.json({ error: session.error }, { status: session.status });
   }
   const result = await adminFetch(
-    '/items/posts?sort=-published_at&fields=id,title,slug,status,published_at,category.name,views'
+    '/items/posts?limit=-1&sort=-published_at&fields=*,category.name'
   );
   if (result.error) {
     return NextResponse.json({ error: result.error }, { status: result.status });
@@ -38,6 +39,11 @@ export async function POST(request: Request) {
   }
 
   // 构造 Directus payload（只允许白名单字段）
+  const singleTag = await usesSinglePostTag();
+  const tagIds = Array.isArray(body.tags) ? body.tags : [];
+  if (singleTag && tagIds.length > 1) {
+    return NextResponse.json({ error: '当前 CMS 标签关联支持单选，请选择一个标签。' }, { status: 400 });
+  }
   const payload: Record<string, any> = {
     title: body.title.trim(),
     slug: body.slug.trim(),
@@ -46,7 +52,7 @@ export async function POST(request: Request) {
     status: body.status === 'published' ? 'published' : 'draft',
     published_at: body.published_at ?? new Date().toISOString(),
     category: body.category ?? null,
-    tags: Array.isArray(body.tags) ? body.tags : [],
+    tags: singleTag ? tagIds[0] ?? null : tagIds,
     views: 0,
   };
 
@@ -57,5 +63,6 @@ export async function POST(request: Request) {
   if (result.error) {
     return NextResponse.json({ error: result.error }, { status: result.status });
   }
+  revalidatePath('/', 'layout');
   return NextResponse.json({ data: result.data?.data }, { status: 201 });
 }

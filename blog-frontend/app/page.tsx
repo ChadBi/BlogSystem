@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { getPosts, getTags } from '@/lib/directus';
+import { getPostCollection, getTags } from '@/lib/directus';
 import { computeSiteStats } from '@/lib/stats';
 import { Hero } from '@/components/Hero';
 import { PageShell } from '@/components/PageShell';
@@ -10,9 +10,10 @@ import { StatsGrid } from '@/components/StatsGrid';
 import { TagPill } from '@/components/TagPill';
 import { Reveal } from '@/components/Reveal';
 import { ArrowRight } from '@/components/icons';
+import { PostThumb } from '@/components/PostThumb';
 
 export default async function HomePage() {
-  const allPosts = await getPosts();
+  const { posts: allPosts, notice } = await getPostCollection();
   const allTags = await getTags();
   const stats = computeSiteStats(allPosts);
   const topTags = [...allTags].sort((a, b) => (b.count ?? 0) - (a.count ?? 0)).slice(0, 8);
@@ -20,7 +21,7 @@ export default async function HomePage() {
   const recent = allPosts.slice(1, 5);
 
   return (
-    <PageShell>
+    <PageShell notice={notice}>
       <div className="space-y-6">
         <Hero />
 
@@ -32,7 +33,14 @@ export default async function HomePage() {
                 查看全部 <ArrowRight size={14} />
               </Link>
             </div>
-            <div className="space-y-3">{recent.map((post, i) => <Reveal key={post.id} delay={i * 60}><PostCard post={post} compact /></Reveal>)}</div>
+              {recent.length > 0 ? (
+                <div className="space-y-3">{recent.map((post, i) => <Reveal key={post.id} delay={i * 60}><PostCard post={post} compact /></Reveal>)}</div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-ocean-800/20 p-6 text-center dark:border-ocean-400/20">
+                  <p className="font-bold">还没有公开文章</p>
+                  <p className="mt-1 text-sm text-slate-500">新文章发布后会显示在这里。</p>
+                </div>
+              )}
           </PixelCard>
           <div className="space-y-6">
             <PixelCard>
@@ -41,7 +49,7 @@ export default async function HomePage() {
             </PixelCard>
             <PixelCard>
               <h2 className="mb-4 text-xl font-black">人气标签</h2>
-              <div className="flex flex-wrap gap-2">{topTags.map((tag) => <TagPill key={tag.id} name={`${tag.name} ${tag.count ?? ''}`} color={tag.color} />)}</div>
+              <div className="flex flex-wrap gap-2">{topTags.map((tag) => <TagPill key={tag.id} name={`${tag.name} ${tag.count ?? ''}`} color={tag.color} href={`/posts?tag=${encodeURIComponent(tag.slug)}`} />)}</div>
             </PixelCard>
           </div>
         </section>
@@ -59,7 +67,7 @@ export default async function HomePage() {
                       sizes="(max-width: 768px) 100vw, 50vw"
                       className="object-cover"
                     />
-                  ) : null}
+                  ) : <PostThumb slug={featured.category?.slug} />}
                 </div>
                 <div className="p-6 md:p-8">
                   <p className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent dark:text-accent-dark">精选文章</p>

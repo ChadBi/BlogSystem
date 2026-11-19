@@ -7,9 +7,8 @@ import { PageShell } from '@/components/PageShell';
 import { PixelCard } from '@/components/PixelCard';
 import { PostThumb } from '@/components/PostThumb';
 import { TagPill } from '@/components/TagPill';
-import { BrandMark } from '@/components/BrandMark';
 import { Reveal } from '@/components/Reveal';
-import { getPostBySlug, getPosts } from '@/lib/directus';
+import { getPostBySlug, getPostCollection, getPosts } from '@/lib/directus';
 import { formatDate } from '@/lib/utils';
 import { Eye } from '@/components/icons';
 
@@ -35,17 +34,31 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
 export default async function ArticlePage({ params }: { params: { slug: string } }) {
   const post = await getPostBySlug(params.slug);
-  const posts = await getPosts();
   if (!post) notFound();
+  const { posts, notice } = await getPostCollection();
 
   const relatedPosts = posts
-    .filter((p) => p.slug !== post.slug && p.category?.slug === post.category?.slug)
-    .slice(0, 3);
+    .filter((p) => p.slug !== post.slug)
+    .map((candidate) => {
+      const sameCategory = candidate.category.id !== 'uncategorized' && candidate.category.id === post.category.id;
+      const sharedTags = candidate.tags.filter((tag) => post.tags.some((current) => current.slug === tag.slug)).length;
+      return { candidate, score: (sameCategory ? 2 : 0) + sharedTags };
+    })
+    .filter(({ score }) => score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3)
+    .map(({ candidate }) => candidate);
 
   return (
-    <PageShell>
-      <div className="grid gap-6 xl:grid-cols-[1fr_320px]">
-        <main className="pixel-card rounded-3xl p-6 md:p-8">
+    <PageShell notice={notice}>
+      <div className="mx-auto max-w-5xl space-y-5">
+        <Link
+          href="/posts"
+          className="inline-flex items-center rounded-xl border-2 border-ocean-800/20 bg-white/60 px-3 py-2 text-sm font-bold text-slate-600 transition hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent dark:border-ocean-400/20 dark:bg-surface/60 dark:text-slate-300"
+        >
+          ← 返回文章列表
+        </Link>
+        <section className="pixel-card rounded-3xl p-6 md:p-8">
           <div className="mb-6 grid gap-6 md:grid-cols-[1fr_220px]">
             <div>
               <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -57,7 +70,9 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                     分类: {post.category.name}
                   </Link>
                 ) : null}
-                {post.tags.map((tag) => <TagPill key={tag.id} name={tag.name} color={tag.color} />)}
+                {post.tags.map((tag) => (
+                  <TagPill key={tag.id} name={tag.name} color={tag.color} href={`/posts?tag=${encodeURIComponent(tag.slug)}`} />
+                ))}
               </div>
               <h1 className="text-4xl font-black leading-tight">{post.title}</h1>
               <p className="mt-4 flex flex-wrap items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
@@ -80,40 +95,24 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             )}
           </div>
           <div className="mb-6 rounded-2xl border-2 border-dashed border-accent bg-accent/5 p-4 font-bold text-ocean-900 dark:text-ocean-100">
-            TL;DR：{post.summary}
+            <span className="mr-2 text-accent dark:text-accent-dark">TL;DR</span>{post.summary || '这篇文章暂未提供摘要。'}
           </div>
           <ArticleContent content={post.content} />
-        </main>
-        <aside className="space-y-4">
+        </section>
+        {relatedPosts.length > 0 ? (
           <Reveal>
             <PixelCard>
-              <h3 className="mb-3 font-black">作者信息</h3>
-              <div className="flex items-center gap-3">
-                <div className="grid h-16 w-16 place-items-center rounded-2xl bg-ocean-100 text-ocean-900 dark:bg-ocean-900/40 dark:text-ocean-100">
-                  <BrandMark size={32} />
-                </div>
-                <div>
-                  <p className="font-black">Shark</p>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">开发者 / 设计师</p>
-                </div>
+              <h3 className="mb-3 font-black">相关文章</h3>
+              <div className="space-y-3">
+                {relatedPosts.map((p) => (
+                  <Link key={p.id} href={`/posts/${p.slug}`} className="block rounded-xl bg-white/60 p-3 text-sm font-bold transition-colors hover:text-accent dark:bg-surface-elevated/60 dark:hover:text-accent-dark">
+                    {p.title}
+                  </Link>
+                ))}
               </div>
             </PixelCard>
           </Reveal>
-          {relatedPosts.length > 0 ? (
-            <Reveal delay={80}>
-              <PixelCard>
-                <h3 className="mb-3 font-black">相关文章</h3>
-                <div className="space-y-3">
-                  {relatedPosts.map((p) => (
-                    <Link key={p.id} href={`/posts/${p.slug}`} className="block rounded-xl bg-white/60 p-3 text-sm font-bold transition-colors hover:text-accent dark:bg-surface-elevated/60 dark:hover:text-accent-dark">
-                      {p.title}
-                    </Link>
-                  ))}
-                </div>
-              </PixelCard>
-            </Reveal>
-          ) : null}
-        </aside>
+        ) : null}
       </div>
     </PageShell>
   );

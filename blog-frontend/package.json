@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "typecheck": "tsc --noEmit",
     "directus:up": "docker compose -f ../directus-cms/docker-compose.yml up -d",
     "directus:down": "docker compose -f ../directus-cms/docker-compose.yml down"
   },
