@@ -28,6 +28,7 @@ export function Header() {
             <Link
               key={item.href}
               href={item.href}
+              prefetch={item.href === '/posts' ? true : undefined}
               className="rounded-xl px-3.5 py-2 text-sm font-bold text-slate-700 transition-colors hover:bg-accent/10 hover:text-accent dark:text-slate-200 dark:hover:text-accent-dark"
             >
               {item.label}

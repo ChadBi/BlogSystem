@@ -4,10 +4,12 @@ import { TagPill } from '@/components/TagPill';
 import { TimelineLine } from '@/components/TimelineLine';
 
 export function Timeline({ posts }: { posts: Post[] }) {
-  const groups = groupByYearMonth(posts);
+  const newestFirst = [...posts].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt));
+  const groups = groupByYearMonth(newestFirst);
+  const years = Object.entries(groups).sort(([a], [b]) => Number(b) - Number(a));
   return (
     <div className="space-y-10">
-      {Object.entries(groups).map(([year, months]) => (
+      {years.map(([year, months]) => (
         <section key={year} className="relative pl-10">
           <h2 className="mb-5 text-3xl font-black text-ocean-900 dark:text-ocean-100">{year}</h2>
           <TimelineLine className="absolute bottom-0 left-4 top-12 w-0.5 bg-ocean-700/40 dark:bg-ocean-400/30" />
