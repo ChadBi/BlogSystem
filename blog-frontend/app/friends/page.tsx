@@ -6,6 +6,7 @@ import { BrandMark } from '@/components/BrandMark';
 import { Reveal } from '@/components/Reveal';
 import { ArrowUpRight } from '@/components/icons';
 import { getFriends } from '@/lib/directus';
+import { authorEmail } from '@/lib/site-profile';
 
 export const metadata: Metadata = {
   title: '友链 - Shark Tech Blog',
@@ -49,6 +50,8 @@ export default async function FriendsPage() {
                     <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{friend.description}</p>
                     <a
                       href={friend.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="mt-3 inline-flex items-center gap-1 font-mono text-xs text-ocean-700 hover:text-accent dark:text-ocean-300 dark:hover:text-accent-dark"
                     >
                       {friend.url} <ArrowUpRight size={12} />
@@ -63,9 +66,7 @@ export default async function FriendsPage() {
         <Reveal>
           <PixelCard className="text-center">
             <h2 className="text-2xl font-black dark:text-ocean-100">交换友链</h2>
-            <a href="mailto:chai_na@foxmail.com" className="mt-5 inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-3 font-black text-white shadow-pixel transition-transform hover:-translate-y-0.5 dark:bg-accent-dark dark:text-ocean-900">
-              邮件联系 <ArrowUpRight size={18} />
-            </a>
+            <p className="mt-4 break-all font-mono text-sm text-accent dark:text-accent-dark">{authorEmail}</p>
           </PixelCard>
         </Reveal>
       </div>
