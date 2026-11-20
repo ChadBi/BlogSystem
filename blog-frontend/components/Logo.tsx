@@ -2,11 +2,14 @@ import { BrandMark } from '@/components/BrandMark';
 
 export function Logo() {
   return (
-    <div className="flex items-center gap-3 font-black text-ink dark:text-[var(--ink)]">
-      <span className="grid h-10 w-10 place-items-center rounded-xl border-2 border-ocean-800 bg-ocean-100 text-ocean-900 shadow-[3px_3px_0_#24406f22] dark:border-ocean-400 dark:bg-ocean-900/40 dark:text-ocean-100">
-        <BrandMark size={22} />
+    <div className="flex items-center gap-2.5 font-black text-[var(--ink)]">
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border-2 border-[var(--pixel-edge)] bg-[#8edbfa]">
+        <BrandMark size={34} />
       </span>
-      <span className="text-xl tracking-tight">Shark Tech Blog</span>
+      <span className="leading-none">
+        <span className="block font-mono text-[10px] tracking-[.14em] text-accent dark:text-accent-dark">SHARK TECH</span>
+        <span className="mt-1 block whitespace-nowrap tracking-tight">浅海实验室</span>
+      </span>
     </div>
   );
 }

@@ -17,8 +17,9 @@ export async function generateStaticParams() {
   return posts.map((post) => ({ slug: post.slug }));
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const post = await getPostBySlug(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getPostBySlug(slug);
   if (!post) return { title: '文章未找到' };
   return {
     title: `${post.title} - Shark Tech Blog`,
@@ -32,8 +33,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function ArticlePage({ params }: { params: { slug: string } }) {
-  const post = await getPostBySlug(params.slug);
+export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const post = await getPostBySlug(slug);
   if (!post) notFound();
   const { posts, notice } = await getPostCollection();
 
@@ -59,7 +61,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           ← 返回文章列表
         </Link>
         <section className="pixel-card rounded-3xl p-6 md:p-8">
-          <div className="mb-6 grid gap-6 md:grid-cols-[1fr_220px]">
+          <div className="mb-6 grid gap-6 border-b border-[var(--line-soft)] pb-6 md:grid-cols-[1fr_220px]">
             <div>
               <div className="mb-3 flex flex-wrap items-center gap-2">
                 {post.category ? (
@@ -74,7 +76,11 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                   <TagPill key={tag.id} name={tag.name} color={tag.color} href={`/posts?tag=${encodeURIComponent(tag.slug)}`} />
                 ))}
               </div>
-              <h1 className="text-4xl font-black leading-tight">{post.title}</h1>
+              <h1 className="break-words text-3xl font-black leading-tight sm:text-4xl">{post.title}</h1>
+              <section aria-label="文章摘要" className="mt-5 border-l-[3px] border-accent/50 pl-4">
+                <h2 className="text-xs font-bold text-accent dark:text-accent-dark">摘要</h2>
+                <p className="mt-1 max-w-prose leading-7 text-[var(--ink-soft)]">{post.summary || '这篇文章暂未提供摘要。'}</p>
+              </section>
               <p className="mt-4 flex flex-wrap items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
                 <span>{formatDate(post.publishedAt)} · Shark</span>
                 <span className="flex items-center gap-1"><Eye size={14} /> {post.views} 浏览</span>
@@ -93,9 +99,6 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             ) : (
               <PostThumb slug={post.category?.slug} />
             )}
-          </div>
-          <div className="mb-6 rounded-2xl border-2 border-dashed border-accent bg-accent/5 p-4 font-bold text-ocean-900 dark:text-ocean-100">
-            <span className="mr-2 text-accent dark:text-accent-dark">TL;DR</span>{post.summary || '这篇文章暂未提供摘要。'}
           </div>
           <ArticleContent content={post.content} />
         </section>

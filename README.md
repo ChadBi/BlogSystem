@@ -4,8 +4,8 @@
 
 ## 技术栈
 
-- **前端**：Next.js 14 + React 18 + TypeScript + Tailwind CSS
-- **CMS**：Directus 11（Docker 运行，SQLite 数据库）
+- **前端**：Next.js 15 + React 18 + TypeScript + Tailwind CSS
+- **CMS**：Directus（Docker 运行，SQLite 数据库）
 - **包管理**：pnpm
 
 ## 项目结构

@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   title: 'Shark Tech Blog',
   description: 'Retro × Ocean × Code 的个人技术博客',
   keywords: ['Next.js', 'Directus', 'Tech Blog', 'Pixel Art', 'Shark'],
-  icons: { icon: '/images/favicon.svg' },
+  icons: { icon: '/images/shark-girl-icon.png', apple: '/images/shark-girl-avatar.webp' },
   openGraph: {
     type: 'website',
     locale: 'zh_CN',
@@ -38,7 +38,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#132447',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#dff6ff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0c1b2b' },
+  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

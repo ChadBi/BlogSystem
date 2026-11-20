@@ -10,9 +10,9 @@ export function PostCard({ post, compact = false }: { post: Post; compact?: bool
   return (
     <Link
       href={`/posts/${post.slug}`}
-      className="group block rounded-2xl border-2 border-ocean-800/15 bg-white/70 p-3 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:rotate-1 hover:border-accent hover:shadow-pixel dark:border-ocean-400/15 dark:bg-surface/60"
+      className="group block rounded-xl border-2 border-[var(--line-soft)] bg-[var(--surface-elevated)] p-3 transition hover:-translate-y-0.5 hover:border-[var(--accent)] hover:shadow-pixel-sm"
     >
-      <div className={compact ? 'grid grid-cols-[84px_1fr] gap-3' : 'space-y-3'}>
+      <div className={compact ? 'grid grid-cols-[84px_minmax(0,1fr)] gap-3' : 'space-y-3'}>
         {post.cover ? (
           <div className={compact ? 'relative h-full min-h-24' : 'relative h-48'}>
             <Image
@@ -20,14 +20,17 @@ export function PostCard({ post, compact = false }: { post: Post; compact?: bool
               alt={post.title}
               fill
               sizes={compact ? '84px' : '(max-width: 768px) 100vw, 33vw'}
-              className="rounded-xl border-2 border-ocean-900/60 object-cover dark:border-ocean-400/20"
+              className="rounded-xl border border-ocean-900/10 object-cover dark:border-ocean-400/20"
             />
           </div>
         ) : (
-          <PostThumb slug={post.category?.slug} />
+          <div className={compact ? 'min-h-24' : 'h-48'}><PostThumb slug={post.category?.slug} compact={compact} /></div>
         )}
         <div>
-          <h3 className="line-clamp-2 font-black transition-colors group-hover:text-accent dark:group-hover:text-accent-dark">{post.title}</h3>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <h3 className="line-clamp-2 font-black transition-colors group-hover:text-accent dark:group-hover:text-accent-dark">{post.title}</h3>
+            <span className="rounded-md bg-ocean-100 px-2 py-0.5 text-xs font-bold text-ocean-800 dark:bg-ocean-700/30 dark:text-ocean-100">{post.category.name}</span>
+          </div>
           <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{post.summary}</p>
           <div className="mt-3 flex flex-wrap gap-2">{post.tags.slice(0, 3).map((tag) => <TagPill key={tag.id} name={tag.name} color={tag.color} />)}</div>
           <div className="mt-3 flex items-center justify-between font-mono text-xs text-slate-500 dark:text-slate-400">

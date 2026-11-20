@@ -1,34 +1,37 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
-import { adminFetch, requireAdminSession, usesSinglePostTag } from '@/lib/directus-admin';
+import { adminFetch, requireAdminSession } from '@/lib/directus-admin';
+import { preparePostTags } from '@/lib/admin-post-tags';
+import { getPostTagIds } from '@/lib/post-tags';
 
 // GET /api/admin/posts/[id] — 获取单篇文章（编辑模式回填）
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await requireAdminSession();
   if (!session.ok) {
     return NextResponse.json({ error: session.error }, { status: session.status });
   }
-  const result = await adminFetch(
-    `/items/posts/${params.id}?fields=*,category.id,tags.*`
-  );
+  const { id } = await params;
+  const result = await adminFetch(`/items/posts/${id}?fields=*,category.id,tags.*,tag_links.*`);
   if (result.error) {
     return NextResponse.json({ error: result.error }, { status: result.status });
   }
-  return NextResponse.json({ data: result.data?.data });
+  const item = result.data?.data;
+  return NextResponse.json({ data: item ? { ...item, tags: getPostTagIds(item) } : item });
 }
 
 // PATCH /api/admin/posts/[id] — 更新文章
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await requireAdminSession();
   if (!session.ok) {
     return NextResponse.json({ error: session.error }, { status: session.status });
   }
+  const { id } = await params;
   let body: Record<string, any>;
   try {
     body = await request.json();
@@ -44,7 +47,9 @@ export async function PATCH(
       if (f === 'status') {
         allowed[f] = body[f] === 'published' ? 'published' : 'draft';
       } else if (f === 'tags') {
-        allowed[f] = Array.isArray(body[f]) ? body[f] : [];
+        const tags = await preparePostTags(body.tags, id);
+        if (tags.error) return NextResponse.json({ error: tags.error }, { status: tags.status });
+        Object.assign(allowed, tags.payload);
       } else {
         allowed[f] = body[f];
       }
@@ -55,14 +60,7 @@ export async function PATCH(
     return NextResponse.json({ error: '没有要更新的字段' }, { status: 400 });
   }
 
-  if ('tags' in allowed && await usesSinglePostTag()) {
-    if (allowed.tags.length > 1) {
-      return NextResponse.json({ error: '当前 CMS 标签关联支持单选，请选择一个标签。' }, { status: 400 });
-    }
-    allowed.tags = allowed.tags[0] ?? null;
-  }
-
-  const result = await adminFetch(`/items/posts/${params.id}`, {
+  const result = await adminFetch(`/items/posts/${id}`, {
     method: 'PATCH',
     body: JSON.stringify(allowed),
   });
@@ -76,13 +74,14 @@ export async function PATCH(
 // DELETE /api/admin/posts/[id] — 删除文章
 export async function DELETE(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await requireAdminSession();
   if (!session.ok) {
     return NextResponse.json({ error: session.error }, { status: session.status });
   }
-  const result = await adminFetch(`/items/posts/${params.id}`, {
+  const { id } = await params;
+  const result = await adminFetch(`/items/posts/${id}`, {
     method: 'DELETE',
   });
   if (result.error) {

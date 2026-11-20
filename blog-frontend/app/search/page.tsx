@@ -10,7 +10,10 @@ export const metadata: Metadata = {
   description: '搜索站内文章。',
 };
 
-export default async function SearchPage({ searchParams }: { searchParams: { q?: string | string[]; tag?: string | string[] } }) {
+export default async function SearchPage({ searchParams: pendingSearchParams }: {
+  searchParams: Promise<{ q?: string | string[]; tag?: string | string[] }>;
+}) {
+  const searchParams = await pendingSearchParams;
   const rawQ = searchParams.q;
   const qStr = Array.isArray(rawQ) ? rawQ[0] ?? '' : rawQ ?? '';
   const q = qStr.toLowerCase();

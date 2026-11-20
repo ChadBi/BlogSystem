@@ -76,17 +76,9 @@ export async function adminFetch<T = any>(
   }
 }
 
-// 兼容已有的单标签关联，以及 JSON / 中间表形式的多标签字段。
-export async function usesSinglePostTag(): Promise<boolean> {
-  const result = await adminFetch<{
-    data: { related_collection: string; meta: { junction_field: string | null } | null };
-  }>('/relations/posts/tags');
-  return result.data?.data.related_collection === 'tags' && !result.data.data.meta?.junction_field;
-}
-
 // 校验当前请求是否已登录前端 admin（基于 session cookie）
 export async function requireAdminSession(): Promise<{ ok: true } | { ok: false; status: number; error: string }> {
-  const token = cookies().get(SESSION_COOKIE)?.value;
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
   const valid = token ? await verifySessionToken(token) : false;
   if (!valid) {
     return { ok: false, status: 401, error: '未登录或会话已过期' };

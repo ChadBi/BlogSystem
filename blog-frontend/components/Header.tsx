@@ -16,14 +16,14 @@ const nav = [
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-40 border-b-2 border-ocean-800/20 bg-shell/88 backdrop-blur-xl dark:border-ocean-400/15 dark:bg-[var(--bg)]/88">
-      <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-40 mx-auto max-w-6xl px-4 pt-3 sm:px-8 sm:pt-5">
+      <div className="relative flex items-center justify-between gap-3 rounded-2xl border-2 border-[var(--pixel-edge)] bg-[var(--surface)] px-3 py-2.5 shadow-pixel sm:px-4">
         <div className="flex items-center gap-3">
           <BackButton />
           <Link href="/" aria-label="返回首页"><Logo /></Link>
         </div>
         {/* nav 绝对居中，不受左右 BackButton/Logo 影响 */}
-        <nav className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-1 md:flex">
+        <nav className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-1 lg:flex">
           {nav.map((item) => (
             <Link
               key={item.href}
@@ -36,8 +36,8 @@ export function Header() {
         </nav>
         <SearchHover />
         <MobileNav />
+        <ScrollProgress />
       </div>
-      <ScrollProgress />
     </header>
   );
 }

@@ -35,7 +35,7 @@ export default async function CategoriesPage() {
                   >
                     <div className="flex items-center gap-3">
                       <span className="grid h-10 w-10 place-items-center rounded-xl bg-accent/10 text-accent dark:bg-accent-dark/10 dark:text-accent-dark">
-                        <CategoryIcon slug={cat.slug} size={20} />
+                        {cat.icon ? <span aria-hidden="true">{cat.icon}</span> : <CategoryIcon slug={cat.slug} size={20} />}
                       </span>
                       <div>
                         <p className="font-black">{cat.name}</p>
@@ -50,7 +50,7 @@ export default async function CategoriesPage() {
           </PixelCard>
           <PixelCard>
             <h2 className="mb-4 text-2xl font-black">标签云</h2>
-            <div className="flex flex-wrap gap-3">{tags.map((tag) => <TagPill key={tag.id} name={`${tag.name} (${tag.count ?? 0})`} color={tag.color} />)}</div>
+            <div className="flex flex-wrap gap-3">{tags.map((tag) => <TagPill key={tag.id} name={`${tag.name} (${tag.count ?? 0})`} color={tag.color} href={`/posts?tag=${encodeURIComponent(tag.slug)}`} />)}</div>
           </PixelCard>
         </div>
       </div>

@@ -5,7 +5,7 @@ export function PageShell({ children, notice }: { children: React.ReactNode; not
   return (
     <>
       <Header />
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-6xl px-4 py-7 sm:px-8 sm:py-9">
         {notice && <p role="status" className="mb-4 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">{notice}</p>}
         <section>{children}</section>
       </main>

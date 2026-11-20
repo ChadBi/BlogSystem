@@ -16,19 +16,19 @@ export default async function HomePage() {
   const { posts: allPosts, notice } = await getPostCollection();
   const allTags = await getTags();
   const stats = computeSiteStats(allPosts);
-  const topTags = [...allTags].sort((a, b) => (b.count ?? 0) - (a.count ?? 0)).slice(0, 8);
+  const topTags = allTags.filter((tag) => (tag.count ?? 0) > 0).sort((a, b) => (b.count ?? 0) - (a.count ?? 0) || a.name.localeCompare(b.name, 'zh-CN')).slice(0, 5);
   const featured = allPosts[0];
-  const recent = allPosts.slice(1, 5);
+  const recent = allPosts.slice(0, 4);
 
   return (
     <PageShell notice={notice}>
       <div className="space-y-6">
         <Hero />
 
-        <section className="grid gap-6 lg:grid-cols-[1.4fr_.9fr]">
-          <PixelCard>
+        <section className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,.9fr)]">
+          <PixelCard className="min-w-0">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-2xl font-black">最新文章</h2>
+              <h2 className="text-2xl font-black">最近文章</h2>
               <Link href="/posts" className="flex items-center gap-1 text-sm font-bold text-accent transition-colors hover:text-accent-dark dark:text-accent-dark">
                 查看全部 <ArrowRight size={14} />
               </Link>
@@ -44,19 +44,19 @@ export default async function HomePage() {
           </PixelCard>
           <div className="space-y-6">
             <PixelCard>
-              <h2 className="mb-4 text-xl font-black">个人数据</h2>
+              <h2 className="mb-4 text-xl font-black">博客数据</h2>
               <StatsGrid stats={stats} />
             </PixelCard>
             <PixelCard>
               <h2 className="mb-4 text-xl font-black">人气标签</h2>
-              <div className="flex flex-wrap gap-2">{topTags.map((tag) => <TagPill key={tag.id} name={`${tag.name} ${tag.count ?? ''}`} color={tag.color} href={`/posts?tag=${encodeURIComponent(tag.slug)}`} />)}</div>
+              {topTags.length ? <div className="flex flex-wrap gap-2">{topTags.map((tag) => <TagPill key={tag.id} name={`${tag.name} ${tag.count}`} color={tag.color} href={`/posts?tag=${encodeURIComponent(tag.slug)}`} />)}</div> : <p className="text-sm text-[var(--ink-soft)]">发布带标签的文章后，这里会显示使用最多的标签。</p>}
             </PixelCard>
           </div>
         </section>
 
-        {featured ? (
+        {featured && allPosts.length > 1 ? (
           <Reveal>
-            <PixelCard className="overflow-hidden p-0" corner>
+            <PixelCard className="overflow-hidden !p-0">
               <div className="grid gap-0 md:grid-cols-[1fr_1.2fr]">
                 <div className="relative min-h-56">
                   {featured.cover ? (

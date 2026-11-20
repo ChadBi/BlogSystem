@@ -3,12 +3,19 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-// 后台布局壳：顶部标题 + 退出按钮 + Tab 导航 + 主体内容
+const adminNav = [
+  { view: 'dashboard', href: '/admin', label: '仪表盘' },
+  { view: 'editor', href: '/admin?view=editor', label: '写作' },
+  { view: 'categories', href: '/admin?view=categories', label: '分类' },
+  { view: 'tags', href: '/admin?view=tags', label: '标签' },
+  { view: 'about', href: '/admin?view=about', label: '关于我' },
+] as const;
+
 export function AdminShell({
   view,
   children,
 }: {
-  view: 'dashboard' | 'editor';
+  view: (typeof adminNav)[number]['view'];
   children: React.ReactNode;
 }) {
   const router = useRouter();
@@ -21,8 +28,8 @@ export function AdminShell({
 
   return (
     <div className="space-y-6">
-      <header className="flex items-center justify-between">
-        <h1 className="text-3xl font-black">管理后台 / ADMIN</h1>
+      <header className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-3xl font-black">管理后台</h1>
         <button
           type="button"
           data-leave-editor
@@ -32,23 +39,17 @@ export function AdminShell({
           退出登录
         </button>
       </header>
-      <nav className="flex gap-2 border-b-2 border-ocean-800/15">
-        <Link
-          href="/admin"
-          className={`rounded-t-xl px-5 py-3 text-sm font-black ${
-            view === 'dashboard' ? 'bg-accent text-white dark:bg-accent-dark dark:text-ocean-900' : 'hover:bg-ocean-100'
-          }`}
-        >
-          仪表盘
-        </Link>
-        <a data-document-navigation
-          href="/admin?view=editor"
-          className={`rounded-t-xl px-5 py-3 text-sm font-black ${
-            view === 'editor' ? 'bg-accent text-white dark:bg-accent-dark dark:text-ocean-900' : 'hover:bg-ocean-100'
-          }`}
-        >
-          写作
-        </a>
+      <nav aria-label="后台导航" className="flex flex-wrap gap-1.5 border-b-2 border-[var(--pixel-edge)] pb-1.5">
+        {adminNav.map((item) => {
+          const className = `rounded-lg px-3 py-2 text-sm font-black sm:px-5 ${
+            view === item.view ? 'bg-accent text-white shadow-pixel-sm dark:bg-accent-dark dark:text-ocean-900' : 'hover:bg-[var(--surface)]'
+          }`;
+          return item.view === 'editor' ? (
+            <a key={item.view} href={item.href} data-document-navigation aria-current={view === item.view ? 'page' : undefined} className={className}>{item.label}</a>
+          ) : (
+            <Link key={item.view} href={item.href} aria-current={view === item.view ? 'page' : undefined} className={className}>{item.label}</Link>
+          );
+        })}
       </nav>
       <div>{children}</div>
     </div>

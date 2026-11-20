@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { FilterSelect } from '@/components/FilterSelect';
 import { useRouter } from 'next/navigation';
 
 
@@ -80,15 +81,13 @@ export function AdminPostList({ posts }: { posts: PostRow[] }) {
     <div className="space-y-4">
       <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_150px_150px]">
         <label className="sr-only" htmlFor="admin-post-search">搜索文章</label>
-        <input id="admin-post-search" value={query} onChange={(event) => updateFilter(() => setQuery(event.target.value))} placeholder="搜索标题或 slug" className="rounded-xl border-2 border-ocean-800/20 bg-white px-3 py-2 text-sm outline-none focus:border-accent focus-visible:ring-2 focus-visible:ring-accent" />
-        <label className="sr-only" htmlFor="admin-post-status">文章状态</label>
-        <select id="admin-post-status" value={status} onChange={(event) => updateFilter(() => setStatus(event.target.value as typeof status))} className="rounded-xl border-2 border-ocean-800/20 bg-white px-3 py-2 text-sm font-bold outline-none focus:border-accent focus-visible:ring-2 focus-visible:ring-accent">
-          <option value="all">全部状态</option><option value="published">已发布</option><option value="draft">草稿</option>
-        </select>
-        <label className="sr-only" htmlFor="admin-post-sort">更新时间排序</label>
-        <select id="admin-post-sort" value={sort} onChange={(event) => updateFilter(() => setSort(event.target.value as typeof sort))} className="rounded-xl border-2 border-ocean-800/20 bg-white px-3 py-2 text-sm font-bold outline-none focus:border-accent focus-visible:ring-2 focus-visible:ring-accent">
-          <option value="newest">最近更新</option><option value="oldest">最早更新</option>
-        </select>
+        <input id="admin-post-search" value={query} onChange={(event) => updateFilter(() => setQuery(event.target.value))} placeholder="搜索标题或 slug" className="rounded-xl border-2 border-ocean-800/20 bg-[var(--surface)] px-3 py-2 text-sm outline-none focus:border-accent focus-visible:ring-2 focus-visible:ring-accent" />
+        <FilterSelect label="文章状态" hideLabel value={status} onChange={(next) => updateFilter(() => setStatus(next as typeof status))} options={[
+          { value: 'all', label: '全部状态' }, { value: 'published', label: '已发布' }, { value: 'draft', label: '草稿' },
+        ]} />
+        <FilterSelect label="更新时间排序" hideLabel value={sort} onChange={(next) => updateFilter(() => setSort(next as typeof sort))} options={[
+          { value: 'newest', label: '最近更新' }, { value: 'oldest', label: '最早更新' },
+        ]} />
       </div>
       <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500">
         <p aria-live="polite">共 {filteredPosts.length} 篇文章{filteredPosts.length > 0 ? ` · 第 ${currentPage}/${totalPages} 页` : ''}</p>

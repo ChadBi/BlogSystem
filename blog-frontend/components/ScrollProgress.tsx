@@ -38,7 +38,7 @@ export function ScrollProgress() {
   return (
     <div
       ref={barRef}
-      className="h-0.5 w-full origin-left bg-mint"
+      className="pointer-events-none absolute inset-x-2 bottom-0 h-0.5 origin-left scale-x-0 rounded-full bg-accent dark:bg-accent-dark"
       aria-hidden="true"
       style={{ willChange: 'transform' }}
     />

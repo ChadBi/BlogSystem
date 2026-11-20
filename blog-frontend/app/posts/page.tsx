@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { FilterSelect } from '@/components/FilterSelect';
 import { PageShell } from '@/components/PageShell';
 import { PostCard } from '@/components/PostCard';
 import { getCategories, getPostCollection, getTags } from '@/lib/directus';
@@ -24,7 +25,8 @@ function pageHref(params: URLSearchParams, page: number): string {
   return query ? `/posts?${query}` : '/posts';
 }
 
-export default async function PostsPage({ searchParams }: { searchParams: SearchParams }) {
+export default async function PostsPage({ searchParams: pendingSearchParams }: { searchParams: Promise<SearchParams> }) {
+  const searchParams = await pendingSearchParams;
   const q = valueOf(searchParams.q).trim();
   const category = valueOf(searchParams.category);
   const tag = valueOf(searchParams.tag);
@@ -68,27 +70,15 @@ export default async function PostsPage({ searchParams }: { searchParams: Search
             关键词
             <input name="q" defaultValue={q} placeholder="搜索标题、摘要和正文" className="mt-2 w-full rounded-xl border border-ocean-800/20 bg-white px-3 py-2.5 outline-none focus-visible:ring-2 focus-visible:ring-accent dark:bg-surface-elevated" />
           </label>
-          <label className="block text-sm font-bold">
-            分类
-            <select name="category" defaultValue={category} className="mt-2 w-full rounded-xl border border-ocean-800/20 bg-white px-3 py-2.5 outline-none focus-visible:ring-2 focus-visible:ring-accent dark:bg-surface-elevated">
-              <option value="">全部分类</option>
-              {categories.map((item) => <option key={item.id} value={item.slug}>{item.name}</option>)}
-            </select>
-          </label>
-          <label className="block text-sm font-bold">
-            标签
-            <select name="tag" defaultValue={tag} className="mt-2 w-full rounded-xl border border-ocean-800/20 bg-white px-3 py-2.5 outline-none focus-visible:ring-2 focus-visible:ring-accent dark:bg-surface-elevated">
-              <option value="">全部标签</option>
-              {tags.map((item) => <option key={item.id} value={item.slug}>{item.name}</option>)}
-            </select>
-          </label>
-          <label className="block text-sm font-bold">
-            排序
-            <select name="sort" defaultValue={sort} className="mt-2 w-full rounded-xl border border-ocean-800/20 bg-white px-3 py-2.5 outline-none focus-visible:ring-2 focus-visible:ring-accent dark:bg-surface-elevated">
-              <option value="newest">最新发布</option>
-              <option value="oldest">最早发布</option>
-            </select>
-          </label>
+          <FilterSelect label="分类" name="category" defaultValue={category} options={[
+            { value: '', label: '全部分类' }, ...categories.map((item) => ({ value: item.slug, label: item.name })),
+          ]} />
+          <FilterSelect label="标签" name="tag" defaultValue={tag} options={[
+            { value: '', label: '全部标签' }, ...tags.map((item) => ({ value: item.slug, label: item.name })),
+          ]} />
+          <FilterSelect label="排序" name="sort" defaultValue={sort} options={[
+            { value: 'newest', label: '最新发布' }, { value: 'oldest', label: '最早发布' },
+          ]} />
           <button className="rounded-xl bg-accent px-5 py-2.5 font-black text-white hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent dark:bg-accent-dark dark:text-ocean-900">应用筛选</button>
         </form>
 

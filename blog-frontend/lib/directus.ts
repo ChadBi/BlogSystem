@@ -1,5 +1,6 @@
 import 'server-only';
 import { cache } from 'react';
+import { getPostTagIds } from '@/lib/post-tags';
 
 import { categories, friends, posts, tags } from '@/lib/mock-data';
 import type { Category, Friend, Post, Tag } from '@/types/post';
@@ -53,21 +54,10 @@ function normalizePost(item: DirectusItem, knownTags: Tag[] = []): Post {
         icon: '📦'
       };
 
-  const tagRows = Array.isArray(item.tags) ? item.tags : item.tags ? [item.tags] : [];
-  const normalizedTags: Tag[] = tagRows
-      .map((row: any): Tag | null => {
-        const value = row?.tags_id ?? row;
-        const tag = typeof value === 'object' && value?.name
-          ? value
-          : knownTags.find((candidate) => String(candidate.id) === String(value?.id ?? value));
-        if (!tag) return null;
-        return {
-          id: String(tag.id ?? tag.slug),
-          name: tag.name,
-          slug: tag.slug,
-          color: tag.color
-        };
-      }).filter((tag: Tag | null): tag is Tag => Boolean(tag?.name && tag?.slug));
+  const normalizedTags = getPostTagIds(item)
+    .map((id) => knownTags.find((tag) => Number(tag.id) === id))
+    .filter((tag): tag is Tag => Boolean(tag?.name && tag?.slug))
+    .map((tag) => ({ ...tag, id: String(tag.id) }));
 
   return {
     id: String(item.id),
@@ -89,7 +79,7 @@ function normalizePost(item: DirectusItem, knownTags: Tag[] = []): Post {
 export const getPostCollection = cache(async () => {
   const [data, tagData] = await Promise.all([
     fetchDirectus<{ data: DirectusItem[] }>(
-      '/items/posts?limit=-1&filter[status][_eq]=published&sort=-published_at&fields=*,category.*,tags.*'
+      '/items/posts?limit=-1&filter[status][_eq]=published&sort=-published_at&fields=*,category.*,tags.*,tag_links.*'
     ),
     fetchDirectus<{ data: Tag[] }>('/items/tags?limit=-1&sort=name'),
   ]);
@@ -107,7 +97,7 @@ export async function getPosts(): Promise<Post[]> {
 export async function getPostBySlug(slug: string): Promise<Post | undefined> {
   const [data, tagData] = await Promise.all([
     fetchDirectus<{ data: DirectusItem[] }>(
-      `/items/posts?filter[slug][_eq]=${encodeURIComponent(slug)}&filter[status][_eq]=published&fields=*,category.*,tags.*&limit=1`
+      `/items/posts?filter[slug][_eq]=${encodeURIComponent(slug)}&filter[status][_eq]=published&fields=*,category.*,tags.*,tag_links.*&limit=1`
     ),
     fetchDirectus<{ data: Tag[] }>('/items/tags?limit=-1&sort=name'),
   ]);

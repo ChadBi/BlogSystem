@@ -12,9 +12,10 @@ export async function generateStaticParams() {
   return categories.map((c) => ({ slug: c.slug }));
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
   const categories = await getCategories();
-  const category = categories.find((c) => c.slug === params.slug);
+  const category = categories.find((c) => c.slug === slug);
   if (!category) return { title: '分类未找到' };
   return {
     title: `${category.name} - Shark Tech Blog`,
@@ -22,13 +23,14 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function CategoryDetailPage({ params }: { params: { slug: string } }) {
+export default async function CategoryDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const categories = await getCategories();
-  const category = categories.find((c) => c.slug === params.slug);
+  const category = categories.find((c) => c.slug === slug);
   if (!category) notFound();
 
   const allPosts = await getPosts();
-  const posts = allPosts.filter((p) => p.category.slug === params.slug);
+  const posts = allPosts.filter((p) => p.category.slug === slug);
 
   return (
     <PageShell>
@@ -41,7 +43,7 @@ export default async function CategoryDetailPage({ params }: { params: { slug: s
           </nav>
           <div className="mt-3 flex items-center gap-3">
             <span className="grid h-12 w-12 place-items-center rounded-xl bg-accent/10 text-accent dark:bg-accent-dark/10 dark:text-accent-dark">
-              <CategoryIcon slug={category.slug} size={24} />
+              {category.icon ? <span className="text-xl" aria-hidden="true">{category.icon}</span> : <CategoryIcon slug={category.slug} size={24} />}
             </span>
             <h1 className="text-4xl font-black">{category.name}</h1>
           </div>

@@ -6,8 +6,9 @@ import { Reveal } from '@/components/Reveal';
 import { StatsGrid } from '@/components/StatsGrid';
 import { getPosts } from '@/lib/directus';
 import { computeSiteStats } from '@/lib/stats';
+import { getAbout } from '@/lib/about';
 
-const skills = ['Rust', 'TypeScript', 'Python', 'Linux', 'Docker', 'Git', 'Web', 'Nginx', 'SQLite', 'TailwindCSS', 'Vite', 'Markdown'];
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: '关于 - Shark Tech Blog',
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AboutPage() {
-  const posts = await getPosts();
+  const [posts, about] = await Promise.all([getPosts(), getAbout()]);
   const stats = computeSiteStats(posts);
   return (
     <PageShell>
@@ -25,10 +26,10 @@ export default async function AboutPage() {
             <div>
               <h1 className="text-4xl font-black md:text-5xl dark:text-ocean-100">关于我</h1>
               <p className="mt-4 text-lg font-bold text-slate-700 dark:text-slate-300">
-                一名热爱代码的开发者，在像素世界里探索技术与未知。
+                {about.intro}
               </p>
               <p className="mt-4 font-mono font-black text-accent dark:text-accent-dark">
-                DIVE INTO THE OCEAN OF CODE!
+                {about.motto}
               </p>
             </div>
             <div className="hidden justify-center md:flex">
@@ -45,8 +46,8 @@ export default async function AboutPage() {
           <Reveal delay={120}>
             <PixelCard>
               <h2 className="mb-4 text-2xl font-black dark:text-ocean-100">关于我 / BIO</h2>
-              <p className="leading-8 text-slate-600 dark:text-slate-300">
-                你好！我是 Shark，一名计算机科学专业的学生和独立开发者。我热爱编程、探索新技术，也喜欢潜入像素海洋，构建有趣的应用与工具。这里记录了我的学习笔记、项目实践和技术思考。
+              <p className="whitespace-pre-wrap leading-8 text-slate-600 dark:text-slate-300">
+                {about.bio}
               </p>
             </PixelCard>
           </Reveal>
@@ -54,7 +55,7 @@ export default async function AboutPage() {
             <PixelCard>
               <h2 className="mb-4 text-2xl font-black dark:text-ocean-100">技术栈 / TECH STACK</h2>
               <div className="flex flex-wrap gap-3">
-                {skills.map((skill) => (
+                {about.skills.map((skill) => (
                   <span
                     key={skill}
                     className="rounded-xl border-2 border-ocean-800/20 bg-white/70 px-4 py-2 font-bold dark:border-ocean-400/20 dark:bg-surface-elevated dark:text-ink"

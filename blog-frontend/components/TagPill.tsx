@@ -9,6 +9,10 @@ const colorMap: Record<string, string> = {
 };
 
 export function TagPill({ name, color, href }: { name: string; color?: string; href?: string }) {
-  const className = `rounded-lg border px-2.5 py-1 text-xs font-bold transition-colors ${colorMap[color ?? 'purple'] ?? colorMap.purple} ${href ? 'hover:border-accent hover:text-accent' : ''}`;
-  return href ? <Link href={href} className={className}>{name}</Link> : <span className={className}>{name}</span>;
+  const hex = color && /^#[0-9a-f]{6}$/i.test(color) ? color : undefined;
+  const palette = (color && Object.prototype.hasOwnProperty.call(colorMap, color) ? colorMap[color] : '')
+    || 'border-ocean-200 bg-ocean-50 text-ocean-800 dark:border-ocean-400/25 dark:bg-ocean-800/25 dark:text-ocean-100';
+  const className = `inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-bold transition-colors ${palette} ${href ? 'hover:border-[var(--accent)] hover:underline' : ''}`;
+  const content = <>{hex && <span aria-hidden="true" className="h-2 w-2 shrink-0 rounded-[2px] border border-black/25" style={{ backgroundColor: hex }} />}{name}</>;
+  return href ? <Link href={href} className={className}>{content}</Link> : <span className={className}>{content}</span>;
 }

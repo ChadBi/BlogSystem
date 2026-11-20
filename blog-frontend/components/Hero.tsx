@@ -1,54 +1,32 @@
 import Link from 'next/link';
-import { BrandMark } from '@/components/BrandMark';
-import { HeroFlowField } from '@/components/HeroFlowField';
-import { HeroTitle } from '@/components/HeroTitle';
-import { SharkFin } from '@/components/SharkSilhouette';
-import { Reveal } from '@/components/Reveal';
-import { Typewriter } from '@/components/Typewriter';
+import Image from 'next/image';
+import { ArrowRight } from '@/components/icons';
 
 export function Hero() {
   return (
-    <section className="ocean-floor relative overflow-hidden rounded-3xl border-2 border-ocean-900/40 bg-ocean-800 p-8 text-white shadow-soft dark:border-ocean-400/20 dark:bg-ocean-900">
-      <HeroFlowField className="absolute inset-0 h-full w-full opacity-70" />
-      <div className="relative z-10 grid items-center gap-8 md:grid-cols-[1fr_280px]">
+    <section className="relative isolate overflow-hidden rounded-[2rem] border-2 border-[var(--pixel-edge)] bg-[#8edbfa] px-6 py-8 text-[#124b70] shadow-[7px_7px_0_var(--pixel-edge)] sm:px-10 lg:px-12">
+      <div aria-hidden="true" className="pointer-events-none absolute -right-10 -top-20 h-72 w-72 rounded-full border-[24px] border-[#bff0ff]/75" />
+      <div aria-hidden="true" className="pointer-events-none absolute -bottom-36 left-1/3 h-72 w-[760px] -rotate-[8deg] border-t-4 border-[#b7ebff]" />
+      <div className="relative grid items-center gap-6 sm:grid-cols-[1.15fr_.85fr]">
         <div>
-          <Reveal as="div" className="font-mono text-xs font-bold uppercase tracking-[0.22em] text-mint">
-            <span className="text-accent dark:text-accent-dark">&gt;</span> shark@blog:~$ init
-          </Reveal>
-          <HeroTitle />
-          <Reveal as="p" delay={160} className="mt-4 max-w-xl text-lg font-medium text-blue-50/90">
-            <Typewriter text="热爱代码，探索技术，分享知识。这里记录我的学习路线、项目实践和工程思考。" />
-          </Reveal>
-          <Reveal as="div" delay={240} className="mt-7 flex flex-wrap gap-3">
-            <Link
-              href="/posts"
-              className="rounded-xl bg-mint px-5 py-3 font-mono font-black text-ocean-900 shadow-pixel transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0"
-            >
-              &gt; 最新文章
-            </Link>
-            <Link
-              href="/about"
-              className="rounded-xl border-2 border-white/30 bg-white/10 px-5 py-3 font-mono font-black text-white backdrop-blur transition-colors hover:bg-white/20"
-            >
-              &gt; 关于我
-            </Link>
-          </Reveal>
-        </div>
-        <Reveal delay={300} className="hidden justify-center md:flex">
-          <div className="scanlines code-window relative grid h-56 w-56 place-items-center rounded-xl">
-            <div className="absolute left-3 top-3 flex gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
-              <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
-            </div>
-            <BrandMark size={160} className="text-mint" />
+          <h1 className="text-4xl font-black leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">你好，我是<span className="block text-[#17648c]">Shark</span></h1>
+          <p className="mt-5 max-w-md text-base font-semibold leading-8 text-[#205c7d]">这里记录我的学习路线、项目实践和工程思考。</p>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <Link href="/posts" className="inline-flex items-center gap-2 rounded-lg border-2 border-[#17648c] bg-[#17648c] px-4 py-2.5 font-mono text-sm font-bold text-white shadow-[4px_4px_0_#0d4768] transition hover:-translate-y-0.5 focus-visible:outline-[#124b70]">浏览文章 <ArrowRight size={16} /></Link>
+            <Link href="/about" className="rounded-lg border-2 border-[#17648c] bg-[#dff8ff] px-4 py-2.5 font-mono text-sm font-bold text-[#17648c] shadow-[4px_4px_0_#17648c] transition hover:-translate-y-0.5 focus-visible:outline-[#124b70]">关于本站</Link>
           </div>
-        </Reveal>
-      </div>
-      <div className="relative z-10 mt-8">
-        <div className="pixel-divider" />
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <SharkFin size={36} className="text-mint [background:var(--bg)]" />
+        </div>
+        <div className="relative mx-auto flex w-full max-w-sm items-center justify-center">
+          <div aria-hidden="true" className="absolute h-56 w-56 rounded-full border-2 border-[#b7ebff] bg-[#c9f2ff] sm:h-64 sm:w-64 lg:h-72 lg:w-72" />
+          <Image
+            src="/images/shark-girl.webp"
+            width={621}
+            height={1120}
+            sizes="(min-width: 1024px) 222px, (min-width: 640px) 200px, 156px"
+            alt="穿蓝色鲨鱼连帽衫、系薄荷色蝴蝶结的白发鲨鱼娘"
+            priority
+            className="relative h-[280px] w-auto drop-shadow-[0_8px_0_#17648c18] sm:h-[360px] lg:h-[400px]"
+          />
         </div>
       </div>
     </section>

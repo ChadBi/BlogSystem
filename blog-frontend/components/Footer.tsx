@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { Heart } from '@/components/icons';
-import { SharkSwimAnimated } from '@/components/SharkSwimAnimated';
 
 const footerNav = [
   { label: '首页', href: '/' },
@@ -14,11 +13,11 @@ const footerNav = [
 export function Footer() {
   return (
     <footer className="relative mt-16 border-t-2 border-ocean-800/15 bg-shell/60 py-10 dark:border-ocean-400/10 dark:bg-surface/40">
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 md:grid-cols-3 lg:px-8">
+      <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:px-8 md:grid-cols-3">
         <div>
           <p className="text-lg font-black text-ink dark:text-[var(--ink)]">Shark Tech Blog</p>
           <p className="mt-2 max-w-xs text-sm text-slate-500 dark:text-slate-400">
-            Retro × Ocean × Code 的个人技术博客，记录探索与思考。
+            记录学习路线、项目实践与工程思考。
           </p>
         </div>
         <nav className="flex flex-wrap gap-x-6 gap-y-2 md:justify-center">
@@ -39,9 +38,6 @@ export function Footer() {
           <p className="mt-2 font-mono text-xs text-slate-400 dark:text-slate-500">&gt; code · dive · share · keep exploring</p>
           <p className="mt-2 font-mono text-xs text-slate-400 dark:text-slate-500">© {new Date().getFullYear()} Shark Tech Blog</p>
         </div>
-      </div>
-      <div className="pointer-events-none mt-8 flex justify-center opacity-[0.06] dark:opacity-[0.08]">
-        <SharkSwimAnimated size={240} className="text-ocean-900 dark:text-ocean-100" />
       </div>
     </footer>
   );

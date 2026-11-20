@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { Category, Tag } from '@/types/post';
 
@@ -31,12 +32,10 @@ export function AdminEditor({
   categories,
   tags,
   post,
-  singleTag,
 }: {
   categories: Category[];
   tags: Tag[];
   post: AdminPost | null;
-  singleTag: boolean;
 }) {
   const router = useRouter();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -102,7 +101,7 @@ export function AdminEditor({
 
   function toggleTag(id: number) {
     setTagIds((prev) =>
-      prev.includes(id) ? prev.filter((t) => t !== id) : singleTag ? [id] : [...prev, id]
+      prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]
     );
   }
 
@@ -209,13 +208,13 @@ export function AdminEditor({
   }
 
   return (
-    <fieldset disabled={submitting || deleting || Boolean(success)} className="grid min-w-0 gap-6 xl:grid-cols-[1fr_320px]">
-      <section className="pixel-card rounded-3xl p-6">
+    <fieldset disabled={submitting || deleting || Boolean(success)} className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
+      <section className="pixel-card min-w-0 rounded-3xl p-4 sm:p-6">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-3xl font-black">
-          {post ? '编辑文章' : '写作编辑器'} / WRITING
+          {post ? '编辑文章' : '写作编辑器'}
           </h2>
-          <span className={`text-sm font-bold ${submitting ? 'text-accent' : hasUnsavedChanges ? 'text-amber-600' : 'text-emerald-600'}`} aria-live="polite">
+          <span className={`text-sm font-bold ${error ? 'text-red-600 dark:text-red-400' : submitting ? 'text-accent' : hasUnsavedChanges ? 'text-amber-600' : 'text-emerald-600'}`} aria-live="polite">
             {submitting ? '保存中…' : error ? '保存失败，请重试' : hasUnsavedChanges ? '有未保存修改' : post || success ? '已保存' : '新建文章'}
           </span>
         </div>
@@ -227,12 +226,12 @@ export function AdminEditor({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="请输入文章标题（必填）"
-          className="mb-4 w-full rounded-xl border-2 border-ocean-800/20 bg-white px-4 py-4 text-xl font-bold outline-none focus:border-accent"
+          className="mb-4 w-full rounded-xl border border-ocean-800/25 dark:border-white/20 bg-white dark:bg-surface-elevated px-4 py-4 text-xl font-bold outline-none focus:border-accent"
         />
 
         {/* Slug */}
         <div className="mb-4 flex items-center gap-3">
-          <label className="flex items-center gap-2 text-sm font-bold text-slate-600">
+          <label className="flex items-center gap-2 text-sm font-bold text-slate-600 dark:text-slate-300">
             <input
               type="checkbox"
               checked={autoSlug}
@@ -248,12 +247,25 @@ export function AdminEditor({
             onChange={(e) => setSlug(e.target.value)}
             placeholder="url-slug"
             disabled={autoSlug}
-            className="flex-1 rounded-xl border-2 border-ocean-800/20 bg-white px-4 py-2 font-mono text-sm outline-none focus:border-accent disabled:bg-ocean-50 disabled:text-slate-500"
+            className="min-w-0 flex-1 rounded-xl border border-ocean-800/25 dark:border-white/20 bg-white dark:bg-surface-elevated px-4 py-2 font-mono text-sm outline-none focus:border-accent disabled:bg-ocean-50 disabled:text-slate-500 dark:disabled:bg-surface dark:disabled:text-slate-400"
           />
         </div>
 
+        {/* 摘要 */}
+        <div className="mb-5">
+          <label htmlFor="editor-summary" className="mb-2 block text-sm font-bold text-slate-600 dark:text-slate-300">文章摘要</label>
+          <textarea
+            id="editor-summary"
+            value={summary}
+            onChange={(e) => setSummary(e.target.value)}
+            placeholder="一句话总结这篇文章"
+            className="min-h-[80px] w-full rounded-xl border border-ocean-800/25 dark:border-white/20 bg-white/70 dark:bg-surface-elevated p-3 text-sm outline-none focus:border-accent"
+          />
+        </div>
+
+        <label htmlFor="editor-content" className="mb-2 block text-sm font-bold">正文</label>
         {/* 工具栏 */}
-        <div className="mb-4 flex flex-wrap gap-2 rounded-xl border-2 border-ocean-800/20 bg-white/70 p-2 text-sm font-bold">
+        <div className="mb-4 flex flex-wrap gap-2 rounded-xl border border-ocean-800/25 dark:border-white/20 bg-white/70 dark:bg-surface-elevated p-2 text-sm font-bold">
           <button type="button" onClick={() => insertLine('## ')} className="rounded-lg px-3 py-1 hover:bg-ocean-100">H2</button>
           <button type="button" onClick={() => insertLine('### ')} className="rounded-lg px-3 py-1 hover:bg-ocean-100">H3</button>
           <button type="button" onClick={() => wrapSelection('**')} className="rounded-lg px-3 py-1 hover:bg-ocean-100">B</button>
@@ -265,34 +277,21 @@ export function AdminEditor({
         </div>
 
         {/* 正文 */}
-        <label htmlFor="editor-content" className="sr-only">Markdown 正文</label>
         <textarea
           id="editor-content"
           ref={textareaRef}
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder={'在这里开始写作吧...\n支持 Markdown 语法'}
-          className="min-h-[520px] w-full rounded-2xl border-2 border-ocean-800/20 bg-white/70 p-5 font-mono text-sm outline-none focus:border-accent"
+          className="min-h-[520px] w-full rounded-2xl border border-ocean-800/25 dark:border-white/20 bg-white/70 dark:bg-surface-elevated p-5 font-mono text-sm outline-none focus:border-accent"
         />
-
-        {/* 摘要 */}
-        <div className="mt-4">
-          <label htmlFor="editor-summary" className="mb-2 block text-sm font-bold text-slate-600">摘要 / SUMMARY</label>
-          <textarea
-            id="editor-summary"
-            value={summary}
-            onChange={(e) => setSummary(e.target.value)}
-            placeholder="一句话总结这篇文章"
-            className="min-h-[80px] w-full rounded-xl border-2 border-ocean-800/20 bg-white/70 p-3 text-sm outline-none focus:border-accent"
-          />
-        </div>
 
         {/* 反馈与操作 */}
         {error && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-sm font-bold text-red-600">{error}</p>}
         {success && <p role="status" className="mt-4 rounded-xl bg-emerald-50 p-3 text-sm font-bold text-emerald-700">{success}</p>}
 
         <div className="mt-5 flex flex-wrap justify-end gap-3">
-          <button type="button" onClick={leaveEditor} className="rounded-xl border-2 border-ocean-800/20 px-5 py-3 font-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
+          <button type="button" onClick={leaveEditor} className="rounded-xl border border-ocean-800/25 dark:border-white/20 px-5 py-3 font-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
             返回管理
           </button>
           {post && (
@@ -326,10 +325,9 @@ export function AdminEditor({
 
       <aside className="space-y-4">
         {/* 状态 - 视觉化状态轨道 */}
-        <div className="pixel-card pixel-corner">
+        <div className="pixel-card rounded-3xl p-5">
           <header className="mb-3 flex items-baseline justify-between">
             <h3 className="font-black tracking-tight">文章状态</h3>
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-400">STATUS</span>
           </header>
           <div className="grid grid-cols-2 gap-2">
             <button
@@ -365,16 +363,16 @@ export function AdminEditor({
               <p className="mt-1 text-[11px] leading-tight text-slate-500 dark:text-slate-400">前台可见</p>
             </button>
           </div>
-          <p className="mt-3 font-mono text-[10px] leading-relaxed text-slate-400">
+          <p className="mt-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
             下方「保存草稿 / 发布文章」按钮会同步此状态。
           </p>
         </div>
 
         {/* 分类 - chip 网格 + select fallback */}
-        <div className="pixel-card">
+        <div className="pixel-card rounded-3xl p-5">
           <header className="mb-3 flex items-baseline justify-between">
             <h3 className="font-black tracking-tight">分类</h3>
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-400">CATEGORY</span>
+            <Link href="/admin?view=categories" className="text-xs font-bold text-accent hover:underline dark:text-accent-dark">管理分类</Link>
           </header>
           <div className="grid grid-cols-2 gap-1.5">
             <button
@@ -410,19 +408,17 @@ export function AdminEditor({
             })}
           </div>
           {categories.length === 0 && (
-            <p className="mt-2 font-mono text-[11px] text-slate-400">暂无分类，请先在 Directus 后台添加</p>
+            <p className="mt-2 text-xs text-[var(--ink-soft)]">可在分类管理中添加分类。</p>
           )}
         </div>
 
         {/* 标签 - 计数 + 选中态 */}
-        <div className="pixel-card">
+        <div className="pixel-card rounded-3xl p-5">
           <header className="mb-3 flex items-baseline justify-between">
             <h3 className="font-black tracking-tight">标签</h3>
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-400">
-              {tagIds.length}/{tags.length} TAGS
-            </span>
+            <Link href="/admin?view=tags" className="text-xs font-bold text-accent hover:underline dark:text-accent-dark">管理标签</Link>
           </header>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1.5" role="group" aria-label="文章标签（可多选）">
             {tags.map((t) => {
               const active = tagIds.includes(Number(t.id));
               return (
@@ -431,48 +427,30 @@ export function AdminEditor({
                   type="button"
                   aria-pressed={active}
                   onClick={() => toggleTag(Number(t.id))}
-                  className={`rounded-full border px-3 py-1 text-xs font-bold transition ${
+                  className={`inline-flex max-w-full items-center gap-1 rounded-full border px-3 py-1 text-xs font-bold transition-colors ${
                     active
                       ? 'border-accent bg-accent text-white dark:border-accent-dark dark:bg-accent-dark dark:text-ocean-900'
                       : 'border-ocean-800/15 bg-white/50 text-slate-600 hover:border-accent/50 hover:text-accent dark:border-ocean-400/15 dark:bg-surface/50 dark:text-slate-300 dark:hover:text-accent-dark'
                   }`}
                 >
-                  {active && <span className="mr-1 font-mono text-[10px]">✓</span>}
-                  {t.name}
+                  <span aria-hidden="true" className={`inline-block w-3 shrink-0 text-center font-mono text-[10px] ${active ? 'visible' : 'invisible'}`}>✓</span>
+                  <span className="min-w-0 break-all text-left">{t.name}</span>
                 </button>
               );
             })}
           </div>
-          {singleTag && <p className="mt-2 text-xs text-slate-500">当前 CMS 标签关联支持单选。</p>}
+          <p className="mt-2 text-xs text-[var(--ink-soft)]" aria-live="polite">可多选，已选 {tagIds.length} 个标签。</p>
           {tags.length === 0 && (
-            <p className="font-mono text-[11px] text-slate-400">暂无标签</p>
+            <p className="mt-2 text-xs text-[var(--ink-soft)]">可在标签管理中添加标签。</p>
           )}
         </div>
 
-        {/* 写作小贴士 - terminal 风格 */}
-        <div className="pixel-card relative overflow-hidden">
-          <div className="pointer-events-none absolute inset-0 bg-ocean-grid bg-[size:18px_18px] opacity-30" aria-hidden="true" />
-          <header className="relative mb-3 flex items-baseline justify-between">
-            <h3 className="font-black tracking-tight">写作小贴士</h3>
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-400">TIPS</span>
-          </header>
-          <ul className="relative space-y-2.5 font-mono text-[11px] leading-relaxed text-slate-600 dark:text-slate-300">
-            <li className="flex gap-2">
-              <span className="text-accent dark:text-accent-dark">{'>'}</span>
-              <span>使用 <span className="rounded bg-ocean-100 px-1 dark:bg-ocean-900/40">Markdown</span> 提升写作效率</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-accent dark:text-accent-dark">{'>'}</span>
-              <span>标题层级 H2-H3 保持清晰结构</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-accent dark:text-accent-dark">{'>'}</span>
-              <span>slug 影响文章 URL，建议英文</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-accent dark:text-accent-dark">{'>'}</span>
-              <span>保存草稿不会出现在前台</span>
-            </li>
+        <div className="pixel-card rounded-3xl p-5">
+          <h3 className="mb-3 font-black">写作提示</h3>
+          <ul className="list-disc space-y-2 pl-4 text-sm leading-relaxed text-slate-600 marker:text-accent dark:text-slate-300">
+            <li>正文支持 Markdown，可用二级和三级标题生成目录。</li>
+            <li>文章地址建议使用英文单词，以短横线分隔。</li>
+            <li>保存为草稿后，仅自己可见。</li>
           </ul>
         </div>
       </aside>
