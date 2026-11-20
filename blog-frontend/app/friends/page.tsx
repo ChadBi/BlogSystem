@@ -22,7 +22,7 @@ export default async function FriendsPage() {
             <div>
               <h1 className="text-4xl font-black md:text-5xl dark:text-ocean-100">好友 / FRIENDS</h1>
               <p className="mt-4 text-lg font-bold text-slate-700 dark:text-slate-300">
-                在这里发现有趣的开发者、技术创作者和开源项目。
+                我的朋友们
               </p>
             </div>
             <div className="hidden justify-center md:flex">
@@ -37,8 +37,8 @@ export default async function FriendsPage() {
               <PixelCard>
                 <div className="flex gap-4">
                   <div className="relative grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-ocean-100 dark:bg-ocean-900/40">
-                    {friend.avatar.startsWith('http') ? (
-                      <Image src={friend.avatar} alt={friend.name} fill sizes="64px" className="object-cover" />
+                    {friend.avatar.startsWith('/images/friends/') || friend.avatar.startsWith('http') ? (
+                      <Image src={friend.avatar} alt={friend.name} fill sizes="64px" unoptimized={friend.avatar.startsWith('/images/friends/')} className="object-cover" />
                     ) : (
                       <BrandMark size={28} className="text-ocean-700 dark:text-ocean-200" />
                     )}
@@ -62,10 +62,10 @@ export default async function FriendsPage() {
 
         <Reveal>
           <PixelCard className="text-center">
-            <h2 className="text-2xl font-black dark:text-ocean-100">加入社区，一起探索技术的海洋！</h2>
-            <button className="mt-5 inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-3 font-black text-white shadow-pixel transition-transform hover:-translate-y-0.5 dark:bg-accent-dark dark:text-ocean-900">
-              申请加入 <ArrowUpRight size={18} />
-            </button>
+            <h2 className="text-2xl font-black dark:text-ocean-100">交换友链</h2>
+            <a href="mailto:chai_na@foxmail.com" className="mt-5 inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-3 font-black text-white shadow-pixel transition-transform hover:-translate-y-0.5 dark:bg-accent-dark dark:text-ocean-900">
+              邮件联系 <ArrowUpRight size={18} />
+            </a>
           </PixelCard>
         </Reveal>
       </div>

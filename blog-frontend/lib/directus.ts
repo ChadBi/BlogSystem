@@ -162,7 +162,7 @@ export async function getFriends(): Promise<Friend[]> {
     role: item.role ?? '',
     description: item.description ?? '',
     url: item.url ?? '#',
-    avatar: item.avatar ? `${DIRECTUS_URL}/assets/${item.avatar}` : '🦈',
+    avatar: item.avatar_url || (item.avatar ? `${DIRECTUS_URL}/assets/${item.avatar}` : '🦈'),
     tags: Array.isArray(item.tags) ? item.tags : []
   }));
 }

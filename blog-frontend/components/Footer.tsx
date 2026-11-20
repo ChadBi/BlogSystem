@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Heart } from '@/components/icons';
+import { authorName } from '@/lib/site-profile';
 
 const footerNav = [
   { label: '首页', href: '/' },
@@ -17,7 +17,7 @@ export function Footer() {
         <div>
           <p className="text-lg font-black text-ink dark:text-[var(--ink)]">Shark Tech Blog</p>
           <p className="mt-2 max-w-xs text-sm text-slate-500 dark:text-slate-400">
-            记录学习路线、项目实践与工程思考。
+            记录数据、算法和代码里的学习旅程。
           </p>
         </div>
         <nav className="flex flex-wrap gap-x-6 gap-y-2 md:justify-center">
@@ -32,11 +32,9 @@ export function Footer() {
           ))}
         </nav>
         <div className="md:text-right">
-          <p className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 md:justify-end">
-            Made with <Heart size={14} className="text-accent dark:text-accent-dark" /> in Ocean
-          </p>
-          <p className="mt-2 font-mono text-xs text-slate-400 dark:text-slate-500">&gt; code · dive · share · keep exploring</p>
-          <p className="mt-2 font-mono text-xs text-slate-400 dark:text-slate-500">© {new Date().getFullYear()} Shark Tech Blog</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">© {new Date().getFullYear()} {authorName}</p>
+          <a href="https://beian.miit.gov.cn/" className="mt-2 block text-xs text-slate-500 hover:underline dark:text-slate-400">滇ICP备2026000183号</a>
+          <a href="https://www.beian.gov.cn/portal/registerSystemInfo?recordcode=53000002076006" className="mt-2 block text-xs text-slate-500 hover:underline dark:text-slate-400">滇公网安备53000002076006号</a>
         </div>
       </div>
     </footer>

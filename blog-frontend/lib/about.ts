@@ -2,9 +2,9 @@ export type AboutRecord = { intro: string | null; motto: string | null; bio: str
 export type About = { intro: string; motto: string; bio: string; skills: string[] };
 
 export const defaultAbout: About = {
-  intro: '一名热爱代码的开发者，在像素世界里探索技术与未知。',
-  motto: 'DIVE INTO THE OCEAN OF CODE!',
-  bio: '你好！我是 Shark，一名计算机科学专业的学生和独立开发者。我热爱编程、探索新技术，也喜欢潜入像素海洋，构建有趣的应用与工具。这里记录了我的学习笔记、项目实践和技术思考。',
+  intro: 'Chai_na · JNU / CS Student',
+  motto: '用一行行代码，记录自己的学习旅程。',
+  bio: '你好，我是 Chai_na，一名计算机科学专业的学生。我把这里当作自己的技术自留地，记录学习中的踩坑和收获，分享数据与算法的学习心得，偶尔也会写些生活感悟。',
   skills: ['Rust', 'TypeScript', 'Python', 'Linux', 'Docker', 'Git', 'Web', 'Nginx', 'SQLite', 'TailwindCSS', 'Vite', 'Markdown'],
 };
 

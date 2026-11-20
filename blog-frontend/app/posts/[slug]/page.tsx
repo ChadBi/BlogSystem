@@ -10,6 +10,7 @@ import { TagPill } from '@/components/TagPill';
 import { Reveal } from '@/components/Reveal';
 import { getPostBySlug, getPostCollection, getPosts } from '@/lib/directus';
 import { formatDate } from '@/lib/utils';
+import { authorName } from '@/lib/site-profile';
 import { Eye } from '@/components/icons';
 
 export async function generateStaticParams() {
@@ -82,7 +83,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                 <p className="mt-1 max-w-prose leading-7 text-[var(--ink-soft)]">{post.summary || '这篇文章暂未提供摘要。'}</p>
               </section>
               <p className="mt-4 flex flex-wrap items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
-                <span>{formatDate(post.publishedAt)} · Shark</span>
+                <span>{formatDate(post.publishedAt)} · {authorName}</span>
                 <span className="flex items-center gap-1"><Eye size={14} /> {post.views} 浏览</span>
               </p>
             </div>

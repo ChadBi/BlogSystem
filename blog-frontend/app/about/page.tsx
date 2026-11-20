@@ -7,6 +7,7 @@ import { StatsGrid } from '@/components/StatsGrid';
 import { getPosts } from '@/lib/directus';
 import { computeSiteStats } from '@/lib/stats';
 import { getAbout } from '@/lib/about';
+import { authorLinks } from '@/lib/site-profile';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,6 +50,13 @@ export default async function AboutPage() {
               <p className="whitespace-pre-wrap leading-8 text-slate-600 dark:text-slate-300">
                 {about.bio}
               </p>
+              <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
+                {authorLinks.map(({ label, href }) => (
+                  <li key={label}>
+                    <a href={href} className="text-sm font-bold text-accent underline dark:text-accent-dark">{label}</a>
+                  </li>
+                ))}
+              </ul>
             </PixelCard>
           </Reveal>
           <Reveal delay={200}>
