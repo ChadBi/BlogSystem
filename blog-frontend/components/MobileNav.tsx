@@ -34,7 +34,6 @@ export function MobileNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                prefetch={item.href === '/posts' ? true : undefined}
                 onClick={() => setOpen(false)}
                 className="rounded-lg px-3 py-2 font-bold text-ocean-900 hover:bg-ocean-50 dark:text-ocean-100 dark:hover:bg-surface-elevated"
               >
