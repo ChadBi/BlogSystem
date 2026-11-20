@@ -39,6 +39,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   const post = await getPostBySlug(slug);
   if (!post) notFound();
   const { posts, notice } = await getPostCollection();
+  const categoryClass = 'rounded-full bg-accent/15 px-3 py-1 text-xs font-bold text-accent dark:bg-accent-dark/15 dark:text-accent-dark';
 
   const relatedPosts = posts
     .filter((p) => p.slug !== post.slug)
@@ -65,14 +66,16 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           <div className="mb-6 grid gap-6 border-b border-[var(--line-soft)] pb-6 md:grid-cols-[1fr_220px]">
             <div>
               <div className="mb-3 flex flex-wrap items-center gap-2">
-                {post.category ? (
+                {post.category.id === 'uncategorized' ? (
+                  <span className={categoryClass}>分类: {post.category.name}</span>
+                ) : (
                   <Link
                     href={`/categories/${post.category.slug}`}
-                    className="rounded-full bg-accent/15 px-3 py-1 text-xs font-bold text-accent transition hover:bg-accent/25 dark:bg-accent-dark/15 dark:text-accent-dark"
+                    className={`${categoryClass} transition hover:bg-accent/25`}
                   >
                     分类: {post.category.name}
                   </Link>
-                ) : null}
+                )}
                 {post.tags.map((tag) => (
                   <TagPill key={tag.id} name={tag.name} color={tag.color} href={`/posts?tag=${encodeURIComponent(tag.slug)}`} />
                 ))}
